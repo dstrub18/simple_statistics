@@ -1,4 +1,4 @@
 fn main() 
 {
-    panic!("This is still just as library. Use cargo test instead!");
+    // let res = simple_statistics::file_reading::read_csv("src/datasets/unique_passengers.csv");
 }
