@@ -176,28 +176,25 @@ pub mod utilities
     }
 
     #[allow(unused)]
-    pub fn standardize_range(x: &Vec<f64>) -> Result<Vec<f64>, String> 
+    pub fn compute_standard_deviation(input_vector: &Vec<f64>) -> Result<f64, String> 
     {
-        let mean = compute_mean(x)?;
-        let standard_deviation = compute_standard_deviation(x)?;
-
-        Ok(x.into_iter()
-            .map(|x| (x - mean) / standard_deviation)
-            .collect())
+        Ok(compute_variance(input_vector)?.sqrt())
     }
 
     #[allow(unused)]
-    pub fn compute_standard_deviation(input_vector: &Vec<f64>) -> Result<f64, String> 
+    pub fn compute_variance(input_vector: &Vec<f64>) -> Result<f64, String>
     {
-        let mean = compute_mean(&input_vector)?;
-        let mut sum_of_squared_differences = 0.0;
-        for i in input_vector.iter() {
-            let diff_to_mean = i - mean;
-            sum_of_squared_differences += diff_to_mean.powi(2);
-        }
-        let variance = sum_of_squared_differences / input_vector.len() as f64;
-        let standard_deviation = variance.sqrt();
-        Ok(standard_deviation as f64)
+        Ok (compute_sum_of_squares(input_vector)? / (input_vector.len() as f64 - 1.0))
+    }
+
+    #[allow(unused)]
+    pub fn compute_sum_of_squares(input_vector: &Vec<f64>) -> Result<f64, String>
+    {
+        let mean = compute_mean(input_vector)?;
+        
+        Ok(input_vector.into_iter().map(
+                                        |element|
+                                        {(element - mean).powi(2)}).sum::<f64>() as f64)
     }
 
     #[allow(unused)]
@@ -328,22 +325,6 @@ mod tests
     }
 
     #[test]
-    fn test_standardize_range() 
-    {
-        let x = vec![34.0, 108.0, 64.0, 88.0, 99.0, 51.0];
-        let result = utilities::standardize_range(&x);
-        let expected_result = Ok(vec![
-                                        -1.5107791492009959,
-                                        1.2841622768208465,
-                                        -0.37769478730024897,
-                                        0.5287727022203486,
-                                        0.9442369682506224,
-                                        -0.8686980107905726,
-                                      ] as Vec<f64>);
-        assert_eq!(result, expected_result);
-    }
-
-    #[test]
     fn test_compute_coefficient_of_determination() 
     {
         let x = vec![34.0, 108.0, 64.0, 88.0, 99.0, 51.0];
@@ -351,7 +332,7 @@ mod tests
         let slope = compute_best_fitting_slope(&x, &observations).unwrap();
         let intercept = compute_best_fitting_intercept(&x, &observations).unwrap();
         let predictions = utilities::compute_predictions(&x, slope, intercept);
-        let result = half_away_from_zero(utilities::compute_coefficient_of_determination(&predictions, &observations),NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::compute_coefficient_of_determination(&predictions, &observations), NUM_DECIMAL_DIGITS);
         
         let expected_result = 0.749;
         assert_eq!(result, expected_result);
@@ -452,15 +433,33 @@ mod tests
     fn test_mean_length_1() 
     {
         let v = vec![2.0];
-        assert_eq!(utilities::compute_mean(&v).unwrap(), 2.0);
+        assert_eq!(utilities::compute_mean(&v).unwrap(), v[0]);
     }
 
     #[test]
     fn test_standard_deviation() 
     {
-        let v = vec![2.0, 4.0, 6.0, 8.0];
-        let result = half_away_from_zero(utilities::compute_standard_deviation(&v).unwrap(), NUM_DECIMAL_DIGITS);
-        let expected_result = 2.236;
+        let v = vec![34.0, 108.0, 64.0, 88.0, 99.0, 51.0];
+        let result = half_away_from_zero (utilities::compute_standard_deviation(&v).unwrap(), NUM_DECIMAL_DIGITS);
+        let expected_result = 29.003;
+        assert_eq!(result, expected_result);
+    }
+
+    #[test]
+    fn test_variance() 
+    {
+        let v = vec![2.0, 3.0, 4.0, 5.0, 6.0];
+        let result = half_away_from_zero(utilities::compute_variance(&v).unwrap(), NUM_DECIMAL_DIGITS);
+        let expected_result = 2.5;
+        assert_eq!(result, expected_result);
+    }
+
+    #[test]
+    fn test_sum_of_squares() 
+    {
+        let v = vec![2.0, 3.0, 4.0, 5.0, 6.0];
+        let result = half_away_from_zero(utilities::compute_sum_of_squares(&v).unwrap(), NUM_DECIMAL_DIGITS);
+        let expected_result = 10.0;
         assert_eq!(result, expected_result);
     }
 
