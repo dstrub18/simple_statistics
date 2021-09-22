@@ -1,19 +1,3 @@
-pub mod file_reading 
-{
-    use std::error::Error;
-    use std::fs::File;
-    pub fn read_csv(path: &str) -> Result<(), Box<dyn Error>> {
-        let file = File::open(path).expect("File not found!");
-        let mut rdr = csv::Reader::from_reader(file);
-        println!("Worked!");
-        for result in rdr.records() {
-            let record = result?;
-            println!("{:?}", record);
-        }
-        Ok(())
-    }
-}
-
 mod counting 
 {
     use super::utilities::compute_factorial;
@@ -23,7 +7,7 @@ mod counting
     {
         if n <= 0 || r <= 0
         {
-            Err(String::from ("n and r must be greater than 0!"))
+            Err(String::from ("n and r must be equal or greater than 0!"))
         }
         else
         {
@@ -36,7 +20,7 @@ mod counting
     {
         if n <= 0 || r <= 0
         {
-            Err(String::from("n and r must be greater than 0!"))
+            Err(String::from("n and r must be equal or greater than 0!"))
         }
         else
         {
@@ -59,7 +43,7 @@ mod simple_linear_regression
     #[allow(unused)]
     pub fn get_slope_and_intercept(x: &Vec<f64>, y: &Vec<f64>) -> Result<(f64, f64), String> {
             Ok((compute_best_fitting_slope(x, y)?,
-            compute_best_fitting_intercept(x, y)?))
+                compute_best_fitting_intercept(x, y)?))
 
     }
 
@@ -109,32 +93,31 @@ mod simple_linear_regression
 pub mod utilities 
 {
     #[allow(unused)]
-    pub fn compute_standard_error(x: &Vec<f64>, y: &Vec<f64>) -> f64 
+    pub fn compute_standard_error(x: &Vec<f64>, y: &Vec<f64>) -> Result<f64, String>
     {
-        compute_mse(x, y).sqrt()
+        Ok(compute_mse(x, y)?.sqrt())
     }
 
     #[allow(unused)]
-    pub fn compute_mse(x: &Vec<f64>, y: &Vec<f64>) -> f64 
+    pub fn compute_mse(x: &Vec<f64>, y: &Vec<f64>) -> Result<f64, String>
     {
         let degrees_of_freedom = 2;
-        // This dependency does not make too much sense.
-        compute_sse(x, y) / ((x.len() - degrees_of_freedom) as f64)
+        Ok(compute_sse(x, y)? / ((x.len() - degrees_of_freedom) as f64))
     }
 
     #[allow(unused)]
     pub fn compute_coefficient_of_determination(
         predictions: &Vec<f64>,
         observations: &Vec<f64>,
-    ) -> f64 
+    ) -> Result<f64, String>
     {
-        compute_ssr(predictions, observations) / compute_sst(observations)
+        Ok(compute_ssr(predictions, observations)? / compute_sst(observations))
     }
 
     #[allow(unused)]
-    pub fn compute_ssr(predictions: &Vec<f64>, observations: &Vec<f64>) -> f64 
+    pub fn compute_ssr(predictions: &Vec<f64>, observations: &Vec<f64>) -> Result<f64, String>
     {
-        compute_sst(observations) - compute_sse(predictions, observations)
+        Ok(compute_sst(observations) - compute_sse(predictions, observations)?)
     }
 
     #[allow(unused)]
@@ -151,9 +134,11 @@ pub mod utilities
     }
 
     #[allow(unused)]
-    pub fn compute_sse(predictions: &Vec<f64>, observations: &Vec<f64>) -> f64 
+    pub fn compute_sse(predictions: &Vec<f64>, observations: &Vec<f64>) -> Result<f64, String >
     {
-        predictions
+        // TODO: Continue here
+        let predictions = check_vector_for_nans(predictions)?;
+        Ok (predictions
             .iter()
             .zip(observations)
             .into_iter()
@@ -163,16 +148,17 @@ pub mod utilities
             })
             .into_iter()
             .sum()
+        )
     }
 
     #[allow(unused)]
-    pub fn compute_predictions(input_vector: &Vec<f64>, slope: f64, intercept: f64) -> Vec<f64> 
+    pub fn compute_predictions(input_vector: &Vec<f64>, slope: f64, intercept: f64) -> Result<Vec<f64>, String>
     {
-        check_vector_for_nans(input_vector);
-        input_vector
+        let input_vector = check_vector_for_nans(input_vector)?;
+        Ok(input_vector
             .into_iter()
             .map(|x| slope * x + intercept)
-            .collect()
+            .collect())
     }
 
     #[allow(unused)]
@@ -309,7 +295,7 @@ mod tests
     {
         let x = vec![4.1512, 14.9715, 8.5378, 12.0471, 13.6555, 6.6369];
         let observations = vec![5.0, 17.0, 11.0, 8.0, 14.0, 5.0];
-        let result = half_away_from_zero(utilities::compute_standard_error(&x, &observations), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::compute_standard_error(&x, &observations).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = 2.742;
         assert_eq!(result, expected_result);
     }
@@ -319,7 +305,7 @@ mod tests
     {
         let x = vec![4.1512, 14.9715, 8.5378, 12.0471, 13.6555, 6.6369];
         let observations = vec![5.0, 17.0, 11.0, 8.0, 14.0, 5.0];
-        let result = half_away_from_zero( utilities::compute_mse(&x, &observations),NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero( utilities::compute_mse(&x, &observations).unwrap(),NUM_DECIMAL_DIGITS);
         let expected_result = 7.519;
         assert_eq!(result, expected_result);
     }
@@ -331,8 +317,8 @@ mod tests
         let observations = vec![5.0, 17.0, 11.0, 8.0, 14.0, 5.0];
         let slope = compute_best_fitting_slope(&x, &observations).unwrap();
         let intercept = compute_best_fitting_intercept(&x, &observations).unwrap();
-        let predictions = utilities::compute_predictions(&x, slope, intercept);
-        let result = half_away_from_zero(utilities::compute_coefficient_of_determination(&predictions, &observations), NUM_DECIMAL_DIGITS);
+        let predictions = utilities::compute_predictions(&x, slope, intercept).unwrap();
+        let result = half_away_from_zero(utilities::compute_coefficient_of_determination(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
         
         let expected_result = 0.749;
         assert_eq!(result, expected_result);
@@ -345,8 +331,8 @@ mod tests
         let observations = vec![5.0, 17.0, 11.0, 8.0, 14.0, 5.0];
         let slope = compute_best_fitting_slope(&x, &observations).unwrap();
         let intercept = compute_best_fitting_intercept(&x, &observations).unwrap();
-        let predictions = utilities::compute_predictions(&x, slope, intercept);
-        let result = half_away_from_zero(utilities::compute_ssr(&predictions, &observations), NUM_DECIMAL_DIGITS);
+        let predictions = utilities::compute_predictions(&x, slope, intercept).unwrap();
+        let result = half_away_from_zero(utilities::compute_ssr(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
         
         let expected_result = 89.925;
         assert_eq!(result, expected_result);
@@ -370,8 +356,8 @@ mod tests
         let x = vec![34.0, 108.0, 64.0, 88.0, 99.0, 51.0];
         let slope = compute_best_fitting_slope(&x, &observations).unwrap();
         let intercept = compute_best_fitting_intercept(&x, &observations).unwrap();
-        let predictions = utilities::compute_predictions(&x, slope, intercept);
-        let result = half_away_from_zero (utilities::compute_sse(&predictions, &observations), NUM_DECIMAL_DIGITS);
+        let predictions = utilities::compute_predictions(&x, slope, intercept).unwrap();
+        let result = half_away_from_zero (utilities::compute_sse(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
 
         let expected_result = 30.075;
         assert_approx_eq::assert_approx_eq!(result, expected_result, 0.1);
@@ -391,11 +377,13 @@ mod tests
     fn test_compute_prediction() 
     {
         let x = vec![34.0, 108.0, 64.0, 88.0, 99.0, 51.0];
+        let result = utilities::compute_predictions(&x, 0.14621968616262482, -0.8202567760342365).unwrap();
+
         let expected_result = vec![4.1512, 14.9715, 8.5378, 12.0471, 13.6555, 6.6369];
 
         assert_eq!(
             round_vector_elements(
-                &utilities::compute_predictions(&x, 0.14621968616262482, -0.8202567760342365),
+                &result,
                 2
             ),
             round_vector_elements(&expected_result, 2)
