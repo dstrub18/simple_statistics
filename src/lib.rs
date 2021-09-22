@@ -32,7 +32,7 @@ mod counting
 /// Linear regression with multiple variables
 mod multiple_regression 
 {
-
+    
 }
 
 /// Linear regression with 1 independent variable.
@@ -41,9 +41,11 @@ mod simple_linear_regression
     use super::utilities::*;
 
     #[allow(unused)]
-    pub fn get_slope_and_intercept(x: &Vec<f64>, y: &Vec<f64>) -> Result<(f64, f64), String> {
-            Ok((compute_best_fitting_slope(x, y)?,
-                compute_best_fitting_intercept(x, y)?))
+    pub fn get_slope_and_intercept(x: &Vec<f64>, y: &Vec<f64>) -> Result<(f64, f64), String> 
+    {
+
+        Ok((compute_best_fitting_slope(x, y)?,
+            compute_best_fitting_intercept(x, y)?))
 
     }
 
@@ -106,10 +108,7 @@ pub mod utilities
     }
 
     #[allow(unused)]
-    pub fn compute_coefficient_of_determination(
-        predictions: &Vec<f64>,
-        observations: &Vec<f64>,
-    ) -> Result<f64, String>
+    pub fn compute_coefficient_of_determination(predictions: &Vec<f64>,observations: &Vec<f64>) -> Result<f64, String>
     {
         Ok(compute_ssr(predictions, observations)? / compute_sst(observations))
     }
