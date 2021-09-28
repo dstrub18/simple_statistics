@@ -1,3 +1,17 @@
+pub mod file_reading
+{
+    use csv::{ReaderBuilder};
+    use ndarray::{Array2};
+    use ndarray_csv::{Array2Reader};
+    #[allow(unused)]
+    pub fn read_csv_to_array(path_to_file:&str) -> Result<Array2<f64>, ndarray_csv::ReadError>
+    {
+        let file = std::fs::File::open(path_to_file).unwrap();
+        let mut reader = ReaderBuilder::new().has_headers(false).from_reader(file);
+        reader.deserialize_array2_dynamic()
+    }
+}
+
 mod counting 
 {
     use super::utilities::compute_factorial;
@@ -32,7 +46,11 @@ mod counting
 /// Linear regression with multiple variables
 mod multiple_regression 
 {
+    #[allow(unused)]
+    struct VariableRelationshipInfo
+    {
 
+    }
 }
 
 /// Linear regression with 1 independent variable.
@@ -66,13 +84,13 @@ mod simple_linear_regression
         let mut numerator_sum = 0.0;
         let mut denominator_sum = 0.0;
 
-        for (x_i, y_i) in independent_variable.iter().zip(dependent_variable) {
+        for (x_i, y_i) in independent_variable.iter().zip(dependent_variable) 
+        {
             let x_diff_to_mean = x_i - mean_independent_variable;
             let y_diff_to_mean = y_i - mean_dependent_variable;
             numerator_sum += x_diff_to_mean * y_diff_to_mean;
 
-            let mut x_dev_denominator = x_i - mean_independent_variable;
-            x_dev_denominator = x_dev_denominator.powi(2);
+            let x_dev_denominator = (x_i - mean_independent_variable).powi(2);
             denominator_sum += x_dev_denominator;
         }
         Ok (numerator_sum / denominator_sum)
@@ -344,6 +362,15 @@ mod tests
         let result = half_away_from_zero(compute_correlation_coefficient(&x, &observations).unwrap(), NUM_DECIMAL_DIGITS);
 
         let expected_result = 0.866;
+        assert_eq!(result, expected_result);
+    }
+    #[test]
+    fn test_compute_auto_correlation() 
+    {
+        let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
+        let result = half_away_from_zero(compute_correlation_coefficient(&x, &x).unwrap(), NUM_DECIMAL_DIGITS);
+
+        let expected_result = 1.0;
         assert_eq!(result, expected_result);
     }
 
