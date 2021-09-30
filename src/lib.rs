@@ -12,7 +12,7 @@ pub mod file_reading
     }
 }
 
-mod counting 
+pub mod counting 
 {
     use super::utilities::compute_factorial;
 
@@ -54,7 +54,7 @@ mod multiple_regression
 }
 
 /// Linear regression with 1 independent variable.
-mod simple_linear_regression 
+pub mod simple_linear_regression 
 {
     use super::utilities::*;
 
@@ -151,7 +151,6 @@ pub mod utilities
     #[allow(unused)]
     pub fn compute_sse(predictions: &ndarray::Array1<f64>, observations: &ndarray::Array1<f64>) -> Result<f64, String >
     {
-        // TODO: Continue here
         let predictions = check_vector_for_nans(predictions)?;
         Ok (predictions
             .iter()
