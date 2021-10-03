@@ -1,3 +1,22 @@
+pub mod sampling
+{
+    #[allow(unused)]
+    pub fn get_sample (array_to_sample: &ndarray::Array2<f64>, num_elements_in_sample: usize) -> ndarray::Array2<f64>
+    {
+        let mut array_to_return = ndarray::Array2::<f64>::zeros((0, array_to_sample.raw_dim()[1]));
+        
+        let random_indices: Vec<u32> = std::iter::repeat_with
+                                                            (|| fastrand::u32(0 .. array_to_sample.raw_dim()[0] as u32))
+                                                            .take(num_elements_in_sample).collect();
+        for i in random_indices
+        {
+            let row_from_source = array_to_sample.index_axis(ndarray::Axis(0), i as usize);
+            array_to_return.push_row(row_from_source);
+        }
+        array_to_return
+    }
+}
+
 pub mod file_reading
 {
     use csv::{ReaderBuilder};
