@@ -4,7 +4,7 @@ pub mod sampling
     pub fn get_sample (array_to_sample: &ndarray::Array2<f64>, num_elements_in_sample: usize) -> ndarray::Array2<f64>
     {
         let mut array_to_return = ndarray::Array2::<f64>::zeros((0, array_to_sample.raw_dim()[1]));
-        
+
         let random_indices: Vec<u32> = std::iter::repeat_with
                                                             (|| fastrand::u32(0 .. array_to_sample.raw_dim()[0] as u32))
                                                             .take(num_elements_in_sample).collect();
@@ -22,11 +22,12 @@ pub mod file_reading
     use csv::{ReaderBuilder};
     use ndarray::{Array2};
     use ndarray_csv::{Array2Reader};
+
     #[allow(unused)]
-    pub fn read_csv_to_array(path_to_file:&str) -> Result<Array2<f64>, ndarray_csv::ReadError>
+    pub fn read_csv_to_array(path_to_file:&str, has_headers: bool) -> Result<Array2<f64>, ndarray_csv::ReadError>
     {
         let file = std::fs::File::open(path_to_file).unwrap();
-        let mut reader = ReaderBuilder::new().has_headers(false).from_reader(file);
+        let mut reader = ReaderBuilder::new().has_headers(has_headers).from_reader(file);
         reader.deserialize_array2_dynamic()
     }
 }
@@ -145,26 +146,27 @@ pub mod utilities
     #[allow(unused)]
     pub fn compute_coefficient_of_determination(predictions: &ndarray::Array1<f64>,observations: &ndarray::Array1<f64>) -> Result<f64, String>
     {
-        Ok(compute_ssr(predictions, observations)? / compute_sst(observations))
+        Ok(compute_ssr(predictions, observations)? / compute_sst(observations)?)
     }
 
     #[allow(unused)]
     pub fn compute_ssr(predictions: &ndarray::Array1<f64>, observations: &ndarray::Array1<f64>) -> Result<f64, String>
     {
-        Ok(compute_sst(observations) - compute_sse(predictions, observations)?)
+        Ok(compute_sst(observations)? - compute_sse(predictions, observations)?)
     }
 
     #[allow(unused)]
-    pub fn compute_sst(observations: &ndarray::Array1<f64>) -> f64 
+    pub fn compute_sst(observations: &ndarray::Array1<f64>) -> Result<f64, String> 
     {
-        let mean = compute_mean(observations).unwrap();
-        observations
+        let mean = compute_mean(observations)?;
+        Ok (observations
             .into_iter()
             .map(|x| {
                 let error = x - mean;
                 error.powi(2)
             })
             .sum()
+        )
     }
 
     #[allow(unused)]
@@ -239,10 +241,12 @@ pub mod utilities
 
     pub fn check_vector_for_nans(input_vector: &ndarray::Array1<f64>) -> Result<&ndarray::Array1<f64>, String> 
     {
-        if !input_vector.iter().any(|&x| x.is_nan()) {
-            Ok(input_vector)
-        } else {
+        if input_vector.iter().any(|&x| x.is_nan()) 
+        {
             Err(String::from("Vector must not contain nans!"))
+        } else 
+        {
+            Ok(input_vector)
         }
     }
 } // End mod utilities
@@ -410,7 +414,7 @@ mod tests
     fn test_compute_sst() 
     {
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let result = utilities::compute_sst(&observations);
+        let result = utilities::compute_sst(&observations).unwrap();
 
         let expected_result = 120.0;
         assert_eq!(result, expected_result);
