@@ -12,7 +12,7 @@ fn main()
     let some_corrcoef = simple_linear_regression::compute_correlation_coefficient(&some_column, &some_other_column).unwrap();
 
     let _some_sample = sampling::get_sample(&some_data, 50);
-    println!("final shape is: {:?}", _some_sample.shape());
+    println!("final shape is: {:?}", _some_sample.unwrap().shape());
 
     
     let some_mean = utilities::compute_mean(&some_column).unwrap();

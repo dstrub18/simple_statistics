@@ -1,19 +1,41 @@
 pub mod sampling
 {
+    use super::utilities::{compute_mean, compute_standard_deviation};
+    
     #[allow(unused)]
-    pub fn get_sample (array_to_sample: &ndarray::Array2<f64>, num_elements_in_sample: usize) -> ndarray::Array2<f64>
+    pub fn get_sample (array_to_sample: &ndarray::Array2<f64>, num_elements_in_sample: usize) -> Result<ndarray::Array2<f64>, String>
     {
-        let mut array_to_return = ndarray::Array2::<f64>::zeros((0, array_to_sample.raw_dim()[1]));
-
-        let random_indices: Vec<u32> = std::iter::repeat_with
-                                                            (|| fastrand::u32(0 .. array_to_sample.raw_dim()[0] as u32))
-                                                            .take(num_elements_in_sample).collect();
-        for i in random_indices
+        if (array_to_sample.raw_dim()[1] >= array_to_sample.raw_dim()[0])
         {
-            let row_from_source = array_to_sample.index_axis(ndarray::Axis(0), i as usize);
-            array_to_return.push_row(row_from_source);
+            return Err(String::from("Number of rows must be great than number of columns!"));
         }
-        array_to_return
+        else
+        if (num_elements_in_sample > array_to_sample.raw_dim()[0])
+        {
+            return Err(String::from("You want to sample more elements than those that are contained in the array"));
+        }
+        else
+        {
+            let mut array_to_return = ndarray::Array2::<f64>::zeros((0, array_to_sample.raw_dim()[1]));
+            
+            let random_indices: Vec<u32> = std::iter::repeat_with
+            (|| fastrand::u32(0 .. array_to_sample.raw_dim()[0] as u32))
+            .take(num_elements_in_sample).collect();
+            for i in random_indices
+            {
+                let row_from_source = array_to_sample.index_axis(ndarray::Axis(0), i as usize);
+                array_to_return.push_row(row_from_source);
+            }
+            Ok(array_to_return)
+        }
+    }
+
+    #[allow(unused)]
+    pub fn compute_t_distribution(population: &ndarray::Array1<f64>, sample: &ndarray::Array1<f64>) -> f64
+    {
+        (compute_mean(sample).unwrap() - compute_mean(population).unwrap()) // Numerator
+        /
+        (compute_standard_deviation(sample).unwrap() / (sample.len() as f64).sqrt()) // Denominator
     }
 }
 
@@ -244,7 +266,8 @@ pub mod utilities
         if input_vector.iter().any(|&x| x.is_nan()) 
         {
             Err(String::from("Vector must not contain nans!"))
-        } else 
+        } 
+        else
         {
             Ok(input_vector)
         }
