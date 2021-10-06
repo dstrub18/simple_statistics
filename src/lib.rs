@@ -396,7 +396,6 @@ mod tests
         assert_eq!(utilities::compute_mean(&vector), expected_result);
     }
 
-    #[allow(unused)]
     #[test]
     fn test_nan_check_for_error() 
     {
