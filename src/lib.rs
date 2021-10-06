@@ -3,8 +3,13 @@ pub mod sampling
     use super::utilities::{compute_mean, compute_standard_deviation};
     
     #[allow(unused)]
-    pub fn get_sample (array_to_sample: &ndarray::Array2<f64>, num_elements_in_sample: usize) -> Result<ndarray::Array2<f64>, String>
+    pub fn get_sample (array_to_sample: &ndarray::Array2<f64>, num_elements_in_sample: usize, set_seed: bool) -> Result<ndarray::Array2<f64>, String>
     {
+        if(set_seed)
+        {
+            fastrand::seed(42);
+        }
+
         if (array_to_sample.raw_dim()[1] >= array_to_sample.raw_dim()[0])
         {
             return Err(String::from("Number of rows must be great than number of columns!"));
@@ -138,20 +143,65 @@ pub mod simple_linear_regression
         Ok (numerator_sum / denominator_sum)
     }
 
-    #[allow(unused)]
-    pub fn compute_correlation_coefficient(
-        independent_variable: &ndarray::Array1<f64>,
-        dependent_variable: &ndarray::Array1<f64>,
-    ) -> Result<f64, String> 
-    {
-        Ok (compute_best_fitting_slope(independent_variable, dependent_variable)?
-            * (compute_standard_deviation(independent_variable)?
-                / compute_standard_deviation(dependent_variable)?))
-    }
+    
 } // End mod linear regression
 
 pub mod utilities 
 {
+    #[allow(unused)]
+    pub fn compute_correlation_coefficient(independent_variable: &ndarray::Array1<f64>, dependent_variable: &ndarray::Array1<f64>,)
+    -> Result<f64, String> 
+    {
+        Ok (compute_sample_covariance(independent_variable, dependent_variable)? / (compute_standard_deviation(independent_variable)? * compute_standard_deviation(dependent_variable)?))
+    }
+
+    #[allow(unused)]
+    pub fn compute_sample_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
+    {
+        check_vectors_for_equal_length(x, y);
+
+        let mut numerator = 0.0;
+        for (x_i, y_i) in x.iter().zip(y)
+        {
+            numerator += (x_i - compute_mean(x)?) * (y_i - compute_mean(y)?);
+        }
+        Ok(numerator / (x.len() as f64 - 1.0))
+    }
+
+    #[allow(unused)]
+    pub fn compute_population_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
+    {
+        check_vectors_for_equal_length(x, y);
+
+        let mut numerator = 0.0;
+        for (x_i, y_i) in x.iter().zip(y)
+        {
+            numerator += (x_i - compute_mean(x)?) * (y_i - compute_mean(y)?);
+        }
+        Ok(numerator / x.len() as f64)
+    }
+
+    #[allow(unused)]
+    pub fn check_vectors_for_equal_length(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>)
+    {
+        if x.len() != y.len()
+        {
+            panic!("Vector lengths do not match!");
+        }
+    }
+
+    #[allow(unused)]
+    pub fn compute_coefficient_of_variation(population: &ndarray::Array1<f64>) -> Result<f64, String>
+    {
+        Ok ((compute_standard_deviation(population)? / compute_mean(population)?)  * 100.0)
+    }
+
+    #[allow(unused)]
+    pub fn compute_z_score(data_point: f64, population: &ndarray::Array1<f64>) -> Result<f64, String>
+    {
+        Ok ((data_point - compute_mean(population)?) / compute_standard_deviation(population)?)
+    }
+
     #[allow(unused)]
     pub fn compute_standard_error(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
     {
@@ -286,6 +336,51 @@ mod tests
     static NUM_DECIMAL_DIGITS: i8 = 3;
 
     #[test]
+    fn test_covariance()
+    {
+        let vector_1 = ndarray::arr1(&[12.0, 30.0, 15.0, 24.0, 14.0, 18.0, 28.0, 26.0, 19.0, 27.0]);
+        let vector_2 = ndarray::arr1(&[20.0, 60.0, 27.0, 50.0, 21.0, 30.0, 61.0, 54.0, 32.0, 57.0]);
+
+        let result = half_away_from_zero(utilities::compute_sample_covariance(&vector_1, &vector_2).unwrap(), NUM_DECIMAL_DIGITS);
+        let expected_result = 106.933;
+
+        assert_eq!(result, expected_result);
+
+    }
+
+    #[test]
+    fn test_covariance_with_self_is_variance()
+    {
+        let vector_1 = ndarray::arr1(&[12.0, 30.0, 15.0, 24.0, 14.0, 18.0, 28.0, 26.0, 19.0, 27.0]);
+
+        let result = half_away_from_zero(utilities::compute_sample_covariance(&vector_1, &vector_1).unwrap(), NUM_DECIMAL_DIGITS);
+        let expected_result = half_away_from_zero(utilities::compute_variance(&vector_1).unwrap(), NUM_DECIMAL_DIGITS);
+
+        assert_eq!(result, expected_result);
+
+    }
+
+    #[test]
+    fn test_coefficient_of_variation()
+    {
+        let vector = ndarray::arr1(&[85.0, 95.0, 75.0, 80.0, 90.0]);
+        
+        let result = half_away_from_zero(utilities::compute_coefficient_of_variation(&vector).unwrap(), NUM_DECIMAL_DIGITS);
+        let expected_result = 9.301;
+        assert_eq!(result, expected_result);
+    }
+
+    #[test]
+    fn test_z_score() 
+    {
+        let vector = ndarray::arr1(&[85.0, 95.0, 75.0, 80.0, 90.0]);
+        let sample = vector[vector.len() - 1].to_owned();
+        let result = half_away_from_zero(utilities::compute_z_score(sample, &vector).unwrap(), NUM_DECIMAL_DIGITS);
+        let expected_result = 0.632;
+        assert_eq!(result, expected_result);
+    }
+
+    #[test]
     fn test_mean_empty_vector() 
     {
         let expected_result = Err(String::from("Vector cannot be empty"));
@@ -404,7 +499,7 @@ mod tests
     {
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
-        let result = half_away_from_zero(compute_correlation_coefficient(&x, &observations).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::compute_correlation_coefficient(&x, &observations).unwrap(), NUM_DECIMAL_DIGITS);
 
         let expected_result = 0.866;
         assert_eq!(result, expected_result);
@@ -413,7 +508,7 @@ mod tests
     fn test_compute_auto_correlation() 
     {
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
-        let result = half_away_from_zero(compute_correlation_coefficient(&x, &x).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::compute_correlation_coefficient(&x, &x).unwrap(), NUM_DECIMAL_DIGITS);
 
         let expected_result = 1.0;
         assert_eq!(result, expected_result);

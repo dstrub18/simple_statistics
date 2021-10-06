@@ -9,12 +9,14 @@ fn main()
     let some_column = some_data.index_axis(Axis(1), 1).to_owned();
     let some_other_column = some_data.index_axis(Axis(1), 2).to_owned();
 
-    let some_corrcoef = simple_linear_regression::compute_correlation_coefficient(&some_column, &some_other_column).unwrap();
+    let use_seed_for_sampling = true;
+    let some_sample = sampling::get_sample(&some_data, 500, use_seed_for_sampling).unwrap();
+    let some_sample_column = some_sample.index_axis(Axis(1), 1).to_owned();
+    let some_t_value = sampling::compute_t_distribution(&some_column, &some_sample_column);
+    println!("t-value is: {:?}", some_t_value);
 
-    let _some_sample = sampling::get_sample(&some_data, 50);
-    println!("final shape is: {:?}", _some_sample.unwrap().shape());
+    let some_corrcoef = utilities::compute_correlation_coefficient(&some_column, &some_other_column).unwrap();
 
-    
     let some_mean = utilities::compute_mean(&some_column).unwrap();
     let some_std = utilities::compute_standard_deviation(&some_column).unwrap();
     let some_variance = utilities::compute_variance(&some_column).unwrap();
