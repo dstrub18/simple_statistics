@@ -5,7 +5,7 @@ pub mod sampling
     #[allow(unused)]
     pub fn get_sample (array_to_sample: &ndarray::Array2<f64>, num_elements_in_sample: usize, set_seed: bool) -> Result<ndarray::Array2<f64>, String>
     {
-        if(set_seed)
+        if (set_seed)
         {
             fastrand::seed(42);
         }
@@ -95,25 +95,14 @@ pub mod counting
 /// Linear regression with multiple variables
 mod multiple_regression 
 {
-    #[allow(unused)]
-    struct VariableRelationshipInfo
-    {
-
-    }
+    
 }
 
 /// Linear regression with 1 independent variable.
 pub mod simple_linear_regression 
 {
     use super::utilities::*;
-
-    #[allow(unused)]
-    pub fn get_slope_and_intercept(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<(f64, f64), String> 
-    {
-            Ok((get_best_fitting_slope(x, y)?,
-                get_best_fitting_intercept(x, y)?))
-    }
-
+    
     #[allow(unused)]
     pub fn get_best_fitting_intercept(
         independent_variable: &ndarray::Array1<f64>,
@@ -144,12 +133,31 @@ pub mod simple_linear_regression
         }
         Ok (numerator_sum / denominator_sum)
     }
-
-    
 } // End mod linear regression
 
 pub mod utilities 
 {
+    #[allow(unused)]
+    #[derive(Debug)]
+    pub struct VariableInfo
+    {
+        mean: f64,
+        standard_deviation: f64,
+        variance: f64
+    }
+
+    // Rename this at some point
+    #[allow(unused)]
+    pub fn get_variable_info(x: &ndarray::Array1<f64>) -> VariableInfo
+    {
+        VariableInfo
+        {
+            mean: get_mean(x).unwrap(),
+            standard_deviation: get_standard_deviation(x).unwrap(),
+            variance: get_variance(x).unwrap()
+        }
+    }
+
     #[allow(unused)]
     pub fn get_correlation_coefficient(independent_variable: &ndarray::Array1<f64>, dependent_variable: &ndarray::Array1<f64>,)
     -> Result<f64, String> 
@@ -589,6 +597,15 @@ mod tests
     {
         let v = ndarray::arr1(&[2.0]);
         assert_eq!(utilities::get_mean(&v).unwrap(), v[0]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_vector_length_for_panic()
+    {
+        let vec1 = ndarray::arr1(&[1.0, 2.0, 3.0]);
+        let vec2 = ndarray::arr1(&[1.0, 2.0]);
+        utilities::check_vectors_for_equal_length(&vec1, &vec2);
     }
 
     #[test]
