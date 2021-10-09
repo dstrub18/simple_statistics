@@ -1,6 +1,6 @@
 pub mod sampling
 {
-    use super::utilities::{compute_mean, compute_standard_deviation};
+    use super::utilities::{get_mean, get_standard_deviation};
     
     #[allow(unused)]
     pub fn get_sample (array_to_sample: &ndarray::Array2<f64>, num_elements_in_sample: usize, set_seed: bool) -> Result<ndarray::Array2<f64>, String>
@@ -36,11 +36,13 @@ pub mod sampling
     }
 
     #[allow(unused)]
-    pub fn compute_t_distribution(population: &ndarray::Array1<f64>, sample: &ndarray::Array1<f64>) -> f64
+    pub fn get_t_distribution(population: &ndarray::Array1<f64>, sample: &ndarray::Array1<f64>) -> Result<f64, String>
     {
-        (compute_mean(sample).unwrap() - compute_mean(population).unwrap()) // Numerator
-        /
-        (compute_standard_deviation(sample).unwrap() / (sample.len() as f64).sqrt()) // Denominator
+        Ok(
+            (get_mean(sample)? - get_mean(population)?) // Numerator
+            /
+            (get_standard_deviation(sample)? / (sample.len() as f64).sqrt()) // Denominator
+          )
     }
 }
 
@@ -61,10 +63,10 @@ pub mod file_reading
 
 pub mod counting 
 {
-    use super::utilities::compute_factorial;
+    use super::utilities::get_factorial;
 
     #[allow(unused)]
-    pub fn compute_combinations(n: u64, r: u64) -> Result<u128, String> 
+    pub fn get_combinations(n: u64, r: u64) -> Result<u128, String> 
     {
         if n <= 0 || r <= 0
         {
@@ -72,12 +74,12 @@ pub mod counting
         }
         else
         {
-            Ok(compute_factorial(n) / (compute_factorial(r) * compute_factorial(n - r)))
+            Ok(get_factorial(n) / (get_factorial(r) * get_factorial(n - r)))
         }
     }
 
     #[allow(unused)]
-    pub fn compute_permutations(n: u64, r: u64) -> Result<u128, String> 
+    pub fn get_permutations(n: u64, r: u64) -> Result<u128, String> 
     {
         if n <= 0 || r <= 0
         {
@@ -85,7 +87,7 @@ pub mod counting
         }
         else
         {
-            Ok(compute_factorial(n) / compute_factorial(n - r))
+            Ok(get_factorial(n) / get_factorial(n - r))
         }
     }
 } //  End counting
@@ -108,26 +110,26 @@ pub mod simple_linear_regression
     #[allow(unused)]
     pub fn get_slope_and_intercept(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<(f64, f64), String> 
     {
-            Ok((compute_best_fitting_slope(x, y)?,
-                compute_best_fitting_intercept(x, y)?))
+            Ok((get_best_fitting_slope(x, y)?,
+                get_best_fitting_intercept(x, y)?))
     }
 
     #[allow(unused)]
-    pub fn compute_best_fitting_intercept(
+    pub fn get_best_fitting_intercept(
         independent_variable: &ndarray::Array1<f64>,
         dependent_variable: &ndarray::Array1<f64>,
     ) -> Result<f64, String>
     {
-        Ok (compute_mean(dependent_variable)?
-            - compute_best_fitting_slope(independent_variable, dependent_variable)?
-            * compute_mean(independent_variable)?)
+        Ok (get_mean(dependent_variable)?
+            - get_best_fitting_slope(independent_variable, dependent_variable)?
+            * get_mean(independent_variable)?)
     }
 
     #[allow(unused)]
-    pub fn compute_best_fitting_slope(independent_variable: &ndarray::Array1<f64>, dependent_variable: &ndarray::Array1<f64>) -> Result<f64, String> 
+    pub fn get_best_fitting_slope(independent_variable: &ndarray::Array1<f64>, dependent_variable: &ndarray::Array1<f64>) -> Result<f64, String> 
     {
-        let mean_independent_variable = compute_mean(independent_variable)?;
-        let mean_dependent_variable = compute_mean(dependent_variable)?;
+        let mean_independent_variable = get_mean(independent_variable)?;
+        let mean_dependent_variable = get_mean(dependent_variable)?;
         let mut numerator_sum = 0.0;
         let mut denominator_sum = 0.0;
 
@@ -149,34 +151,34 @@ pub mod simple_linear_regression
 pub mod utilities 
 {
     #[allow(unused)]
-    pub fn compute_correlation_coefficient(independent_variable: &ndarray::Array1<f64>, dependent_variable: &ndarray::Array1<f64>,)
+    pub fn get_correlation_coefficient(independent_variable: &ndarray::Array1<f64>, dependent_variable: &ndarray::Array1<f64>,)
     -> Result<f64, String> 
     {
-        Ok (compute_sample_covariance(independent_variable, dependent_variable)? / (compute_standard_deviation(independent_variable)? * compute_standard_deviation(dependent_variable)?))
+        Ok (get_sample_covariance(independent_variable, dependent_variable)? / (get_standard_deviation(independent_variable)? * get_standard_deviation(dependent_variable)?))
     }
 
     #[allow(unused)]
-    pub fn compute_sample_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn get_sample_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
     {
         check_vectors_for_equal_length(x, y);
 
         let mut numerator = 0.0;
         for (x_i, y_i) in x.iter().zip(y)
         {
-            numerator += (x_i - compute_mean(x)?) * (y_i - compute_mean(y)?);
+            numerator += (x_i - get_mean(x)?) * (y_i - get_mean(y)?);
         }
         Ok(numerator / (x.len() as f64 - 1.0))
     }
 
     #[allow(unused)]
-    pub fn compute_population_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn get_population_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
     {
         check_vectors_for_equal_length(x, y);
 
         let mut numerator = 0.0;
         for (x_i, y_i) in x.iter().zip(y)
         {
-            numerator += (x_i - compute_mean(x)?) * (y_i - compute_mean(y)?);
+            numerator += (x_i - get_mean(x)?) * (y_i - get_mean(y)?);
         }
         Ok(numerator / x.len() as f64)
     }
@@ -191,46 +193,46 @@ pub mod utilities
     }
 
     #[allow(unused)]
-    pub fn compute_coefficient_of_variation(population: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn get_coefficient_of_variation(population: &ndarray::Array1<f64>) -> Result<f64, String>
     {
-        Ok ((compute_standard_deviation(population)? / compute_mean(population)?)  * 100.0)
+        Ok ((get_standard_deviation(population)? / get_mean(population)?)  * 100.0)
     }
 
     #[allow(unused)]
-    pub fn compute_z_score(data_point: f64, population: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn get_z_score(data_point: f64, population: &ndarray::Array1<f64>) -> Result<f64, String>
     {
-        Ok ((data_point - compute_mean(population)?) / compute_standard_deviation(population)?)
+        Ok ((data_point - get_mean(population)?) / get_standard_deviation(population)?)
     }
 
     #[allow(unused)]
-    pub fn compute_standard_error(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn get_standard_error(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
     {
-        Ok(compute_mse(x, y)?.sqrt())
+        Ok(get_mse(x, y)?.sqrt())
     }
 
     #[allow(unused)]
-    pub fn compute_mse(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn get_mse(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
     {
         let degrees_of_freedom = 2;
-        Ok(compute_sse(x, y)? / ((x.len() - degrees_of_freedom) as f64))
+        Ok(get_sse(x, y)? / ((x.len() - degrees_of_freedom) as f64))
     }
 
     #[allow(unused)]
-    pub fn compute_coefficient_of_determination(predictions: &ndarray::Array1<f64>,observations: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn get_coefficient_of_determination(predictions: &ndarray::Array1<f64>,observations: &ndarray::Array1<f64>) -> Result<f64, String>
     {
-        Ok(compute_ssr(predictions, observations)? / compute_sst(observations)?)
+        Ok(get_ssr(predictions, observations)? / get_sst(observations)?)
     }
 
     #[allow(unused)]
-    pub fn compute_ssr(predictions: &ndarray::Array1<f64>, observations: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn get_ssr(predictions: &ndarray::Array1<f64>, observations: &ndarray::Array1<f64>) -> Result<f64, String>
     {
-        Ok(compute_sst(observations)? - compute_sse(predictions, observations)?)
+        Ok(get_sst(observations)? - get_sse(predictions, observations)?)
     }
 
     #[allow(unused)]
-    pub fn compute_sst(observations: &ndarray::Array1<f64>) -> Result<f64, String> 
+    pub fn get_sst(observations: &ndarray::Array1<f64>) -> Result<f64, String> 
     {
-        let mean = compute_mean(observations)?;
+        let mean = get_mean(observations)?;
         Ok (observations
             .into_iter()
             .map(|x| {
@@ -242,8 +244,9 @@ pub mod utilities
     }
 
     #[allow(unused)]
-    pub fn compute_sse(predictions: &ndarray::Array1<f64>, observations: &ndarray::Array1<f64>) -> Result<f64, String >
+    pub fn get_sse(predictions: &ndarray::Array1<f64>, observations: &ndarray::Array1<f64>) -> Result<f64, String >
     {
+        check_vectors_for_equal_length(predictions, observations);
         let predictions = check_vector_for_nans(predictions)?;
         Ok (predictions
             .iter()
@@ -259,7 +262,7 @@ pub mod utilities
     }
 
     #[allow(unused)]
-    pub fn compute_predictions(input_vector: &ndarray::Array1<f64>, slope: f64, intercept: f64) -> Result<ndarray::Array1<f64>, String>
+    pub fn get_predictions(input_vector: &ndarray::Array1<f64>, slope: f64, intercept: f64) -> Result<ndarray::Array1<f64>, String>
     {
         let input_vector = check_vector_for_nans(input_vector)?;
         Ok(input_vector
@@ -269,21 +272,21 @@ pub mod utilities
     }
 
     #[allow(unused)]
-    pub fn compute_standard_deviation(input_vector: &ndarray::Array1<f64>) -> Result<f64, String> 
+    pub fn get_standard_deviation(input_vector: &ndarray::Array1<f64>) -> Result<f64, String> 
     {
-        Ok(compute_variance(input_vector)?.sqrt())
+        Ok(get_variance(input_vector)?.sqrt())
     }
 
     #[allow(unused)]
-    pub fn compute_variance(input_vector: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn get_variance(input_vector: &ndarray::Array1<f64>) -> Result<f64, String>
     {
-        Ok (compute_sum_of_squares(input_vector)? / (input_vector.len() as f64 - 1.0))
+        Ok (get_sum_of_squares(input_vector)? / (input_vector.len() as f64 - 1.0))
     }
 
     #[allow(unused)]
-    pub fn compute_sum_of_squares(input_vector: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn get_sum_of_squares(input_vector: &ndarray::Array1<f64>) -> Result<f64, String>
     {
-        let mean = compute_mean(input_vector)?;
+        let mean = get_mean(input_vector)?;
         
         Ok(input_vector.into_iter().map(
                                         |element|
@@ -291,7 +294,7 @@ pub mod utilities
     }
 
     #[allow(unused)]
-    pub fn compute_mean(input_vector: &ndarray::Array1<f64>) -> Result<f64, String> 
+    pub fn get_mean(input_vector: &ndarray::Array1<f64>) -> Result<f64, String> 
     {
         let input_vector = check_vector_for_nans(input_vector)?;
         match input_vector.len() {
@@ -301,7 +304,7 @@ pub mod utilities
         }
     }
 
-    pub fn compute_factorial(n: u64) -> u128 
+    pub fn get_factorial(n: u64) -> u128 
     {
         let mut result: u128 = 1;
         for i in (2..n + 1).rev() 
@@ -341,7 +344,7 @@ mod tests
         let vector_1 = ndarray::arr1(&[12.0, 30.0, 15.0, 24.0, 14.0, 18.0, 28.0, 26.0, 19.0, 27.0]);
         let vector_2 = ndarray::arr1(&[20.0, 60.0, 27.0, 50.0, 21.0, 30.0, 61.0, 54.0, 32.0, 57.0]);
 
-        let result = half_away_from_zero(utilities::compute_sample_covariance(&vector_1, &vector_2).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::get_sample_covariance(&vector_1, &vector_2).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = 106.933;
 
         assert_eq!(result, expected_result);
@@ -353,8 +356,8 @@ mod tests
     {
         let vector_1 = ndarray::arr1(&[12.0, 30.0, 15.0, 24.0, 14.0, 18.0, 28.0, 26.0, 19.0, 27.0]);
 
-        let result = half_away_from_zero(utilities::compute_sample_covariance(&vector_1, &vector_1).unwrap(), NUM_DECIMAL_DIGITS);
-        let expected_result = half_away_from_zero(utilities::compute_variance(&vector_1).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::get_sample_covariance(&vector_1, &vector_1).unwrap(), NUM_DECIMAL_DIGITS);
+        let expected_result = half_away_from_zero(utilities::get_variance(&vector_1).unwrap(), NUM_DECIMAL_DIGITS);
 
         assert_eq!(result, expected_result);
 
@@ -365,7 +368,7 @@ mod tests
     {
         let vector = ndarray::arr1(&[85.0, 95.0, 75.0, 80.0, 90.0]);
         
-        let result = half_away_from_zero(utilities::compute_coefficient_of_variation(&vector).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::get_coefficient_of_variation(&vector).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = 9.301;
         assert_eq!(result, expected_result);
     }
@@ -375,7 +378,7 @@ mod tests
     {
         let vector = ndarray::arr1(&[85.0, 95.0, 75.0, 80.0, 90.0]);
         let sample = vector[vector.len() - 1].to_owned();
-        let result = half_away_from_zero(utilities::compute_z_score(sample, &vector).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::get_z_score(sample, &vector).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = 0.632;
         assert_eq!(result, expected_result);
     }
@@ -385,7 +388,7 @@ mod tests
     {
         let expected_result = Err(String::from("Vector cannot be empty"));
         let vector = ndarray::arr1(&[]);
-        assert_eq!(utilities::compute_mean(&vector), expected_result);
+        assert_eq!(utilities::get_mean(&vector), expected_result);
     }
 
     #[test]
@@ -393,7 +396,7 @@ mod tests
     {
         let expected_result = Err(String::from("Vector must not contain nans!"));
         let vector = ndarray::arr1(&[2.0, f64::NAN]);
-        assert_eq!(utilities::compute_mean(&vector), expected_result);
+        assert_eq!(utilities::get_mean(&vector), expected_result);
     }
 
     #[test]
@@ -418,7 +421,7 @@ mod tests
     {
         let n = 10;
         let r = 3;
-        let result = counting::compute_permutations(n, r);
+        let result = counting::get_permutations(n, r);
 
         let expected_result: Result<u128, String> = Ok(720);
         assert_eq!(result, expected_result);
@@ -429,7 +432,7 @@ mod tests
     {
         let n = 10;
         let r = 3;
-        let result = counting::compute_combinations(n, r);
+        let result = counting::get_combinations(n, r);
 
         let expected_result: Result<u128, String> = Ok(120);
         assert_eq!(result, expected_result);
@@ -439,109 +442,109 @@ mod tests
     fn test_factorial() 
     {
         let n = 4;
-        let result = utilities::compute_factorial(n);
+        let result = utilities::get_factorial(n);
         
         let expected_result: u128 = 24;
         assert_eq!(result, expected_result);
     }
 
     #[test]
-    fn test_compute_standard_error() 
+    fn test_get_standard_error() 
     {
         let x = ndarray::arr1(&[4.1512, 14.9715, 8.5378, 12.0471, 13.6555, 6.6369]);
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let result = half_away_from_zero(utilities::compute_standard_error(&x, &observations).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::get_standard_error(&x, &observations).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = 2.742;
         assert_eq!(result, expected_result);
     }
 
     #[test]
-    fn test_compute_mse() 
+    fn test_get_mse() 
     {
         let x = ndarray::arr1(&[4.1512, 14.9715, 8.5378, 12.0471, 13.6555, 6.6369]);
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let result = half_away_from_zero( utilities::compute_mse(&x, &observations).unwrap(),NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero( utilities::get_mse(&x, &observations).unwrap(),NUM_DECIMAL_DIGITS);
         let expected_result = 7.519;
         assert_eq!(result, expected_result);
     }
 
     #[test]
-    fn test_compute_coefficient_of_determination() 
+    fn test_get_coefficient_of_determination() 
     {
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let slope = compute_best_fitting_slope(&x, &observations).unwrap();
-        let intercept = compute_best_fitting_intercept(&x, &observations).unwrap();
-        let predictions = utilities::compute_predictions(&x, slope, intercept).unwrap();
-        let result = half_away_from_zero(utilities::compute_coefficient_of_determination(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
+        let slope = get_best_fitting_slope(&x, &observations).unwrap();
+        let intercept = get_best_fitting_intercept(&x, &observations).unwrap();
+        let predictions = utilities::get_predictions(&x, slope, intercept).unwrap();
+        let result = half_away_from_zero(utilities::get_coefficient_of_determination(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
         
         let expected_result = 0.749;
         assert_eq!(result, expected_result);
     }
 
     #[test]
-    fn test_compute_ssr() 
+    fn test_get_ssr() 
     {
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let slope = compute_best_fitting_slope(&x, &observations).unwrap();
-        let intercept = compute_best_fitting_intercept(&x, &observations).unwrap();
-        let predictions = utilities::compute_predictions(&x, slope, intercept).unwrap();
-        let result = half_away_from_zero(utilities::compute_ssr(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
+        let slope = get_best_fitting_slope(&x, &observations).unwrap();
+        let intercept = get_best_fitting_intercept(&x, &observations).unwrap();
+        let predictions = utilities::get_predictions(&x, slope, intercept).unwrap();
+        let result = half_away_from_zero(utilities::get_ssr(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
         
         let expected_result = 89.925;
         assert_eq!(result, expected_result);
     }
 
     #[test]
-    fn test_compute_correlation_coefficient() 
+    fn test_get_correlation_coefficient() 
     {
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
-        let result = half_away_from_zero(utilities::compute_correlation_coefficient(&x, &observations).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::get_correlation_coefficient(&x, &observations).unwrap(), NUM_DECIMAL_DIGITS);
 
         let expected_result = 0.866;
         assert_eq!(result, expected_result);
     }
     #[test]
-    fn test_compute_auto_correlation() 
+    fn test_get_auto_correlation() 
     {
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
-        let result = half_away_from_zero(utilities::compute_correlation_coefficient(&x, &x).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::get_correlation_coefficient(&x, &x).unwrap(), NUM_DECIMAL_DIGITS);
 
         let expected_result = 1.0;
         assert_eq!(result, expected_result);
     }
 
     #[test]
-    fn test_compute_sse() 
+    fn test_get_sse() 
     {
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
-        let slope = compute_best_fitting_slope(&x, &observations).unwrap();
-        let intercept = compute_best_fitting_intercept(&x, &observations).unwrap();
-        let predictions = utilities::compute_predictions(&x, slope, intercept).unwrap();
-        let result = half_away_from_zero (utilities::compute_sse(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
+        let slope = get_best_fitting_slope(&x, &observations).unwrap();
+        let intercept = get_best_fitting_intercept(&x, &observations).unwrap();
+        let predictions = utilities::get_predictions(&x, slope, intercept).unwrap();
+        let result = half_away_from_zero (utilities::get_sse(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
 
         let expected_result = 30.075;
         assert_approx_eq::assert_approx_eq!(result, expected_result, 0.1);
     }
 
     #[test]
-    fn test_compute_sst() 
+    fn test_get_sst() 
     {
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let result = utilities::compute_sst(&observations).unwrap();
+        let result = utilities::get_sst(&observations).unwrap();
 
         let expected_result = 120.0;
         assert_eq!(result, expected_result);
     }
 
     #[test]
-    fn test_compute_prediction() 
+    fn test_get_prediction() 
     {
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
-        let result = utilities::compute_predictions(&x, 0.14621968616262482, -0.8202567760342365).unwrap();
+        let result = utilities::get_predictions(&x, 0.14621968616262482, -0.8202567760342365).unwrap();
 
         let expected_result = ndarray::arr1(&[4.1512, 14.9715, 8.5378, 12.0471, 13.6555, 6.6369]);
 
@@ -559,7 +562,7 @@ mod tests
     {
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
         let y = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let result = half_away_from_zero(compute_best_fitting_intercept(&x, &y).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(get_best_fitting_intercept(&x, &y).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = -0.820;
         assert_eq!(result, expected_result);
     }
@@ -569,7 +572,7 @@ mod tests
     {
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
         let y = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let result = half_away_from_zero(compute_best_fitting_slope(&x, &y).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(get_best_fitting_slope(&x, &y).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = 0.146;
         assert_eq!(result, expected_result);
     }
@@ -578,21 +581,21 @@ mod tests
     fn test_mean() 
     {
         let v = ndarray::arr1(&[2.0, 4.0, 6.0]);
-        assert_eq!(utilities::compute_mean(&v).unwrap(), 4.0);
+        assert_eq!(utilities::get_mean(&v).unwrap(), 4.0);
     }
     
     #[test]
     fn test_mean_length_1() 
     {
         let v = ndarray::arr1(&[2.0]);
-        assert_eq!(utilities::compute_mean(&v).unwrap(), v[0]);
+        assert_eq!(utilities::get_mean(&v).unwrap(), v[0]);
     }
 
     #[test]
     fn test_standard_deviation() 
     {
         let v = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
-        let result = half_away_from_zero (utilities::compute_standard_deviation(&v).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero (utilities::get_standard_deviation(&v).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = 29.003;
         assert_eq!(result, expected_result);
     }
@@ -601,7 +604,7 @@ mod tests
     fn test_variance() 
     {
         let v = ndarray::arr1(&[2.0, 3.0, 4.0, 5.0, 6.0]);
-        let result = half_away_from_zero(utilities::compute_variance(&v).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::get_variance(&v).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = 2.5;
         assert_eq!(result, expected_result);
     }
@@ -610,7 +613,7 @@ mod tests
     fn test_sum_of_squares() 
     {
         let v = ndarray::arr1(&[2.0, 3.0, 4.0, 5.0, 6.0]);
-        let result = half_away_from_zero(utilities::compute_sum_of_squares(&v).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(utilities::get_sum_of_squares(&v).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = 10.0;
         assert_eq!(result, expected_result);
     }

@@ -1,4 +1,4 @@
-use simple_statistics::{file_reading, utilities, sampling, simple_linear_regression};
+use simple_statistics::{file_reading, utilities, sampling};
 use ndarray::{Axis};
 
 fn main()
@@ -12,14 +12,14 @@ fn main()
     let use_seed_for_sampling = true;
     let some_sample = sampling::get_sample(&some_data, 500, use_seed_for_sampling).unwrap();
     let some_sample_column = some_sample.index_axis(Axis(1), 1).to_owned();
-    let some_t_value = sampling::compute_t_distribution(&some_column, &some_sample_column);
+    let some_t_value = sampling::get_t_distribution(&some_column, &some_sample_column);
     println!("t-value is: {:?}", some_t_value);
 
-    let some_corrcoef = utilities::compute_correlation_coefficient(&some_column, &some_other_column).unwrap();
+    let some_corrcoef = utilities::get_correlation_coefficient(&some_column, &some_other_column).unwrap();
 
-    let some_mean = utilities::compute_mean(&some_column).unwrap();
-    let some_std = utilities::compute_standard_deviation(&some_column).unwrap();
-    let some_variance = utilities::compute_variance(&some_column).unwrap();
+    let some_mean = utilities::get_mean(&some_column).unwrap();
+    let some_std = utilities::get_standard_deviation(&some_column).unwrap();
+    let some_variance = utilities::get_variance(&some_column).unwrap();
 
     println!(" mean: {:?},\n std: {:?},\n var: {:?},\n corrcoef: {:}", some_mean, some_std, some_variance, some_corrcoef);
 }
