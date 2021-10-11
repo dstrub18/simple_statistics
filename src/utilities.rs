@@ -27,6 +27,9 @@ pub struct VariableTargetInfo
 
     correlation_coefficient: f64,
     covariance: f64,
+    sst: f64,
+    sse: f64,
+    ssr: f64,
 
 }
 
@@ -40,7 +43,9 @@ pub fn get_variable_target_info(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f6
 
             correlation_coefficient: get_correlation_coefficient(x, y).unwrap(),
             covariance: get_sample_covariance(x, y).unwrap(),
-
+            sst: get_coefficient_of_determination(x, y).unwrap(),
+            sse: get_sse(x, y).unwrap(),
+            ssr: get_ssr(x, y).unwrap()
         }
 }
 
@@ -131,8 +136,7 @@ pub fn get_sst(observations: &ndarray::Array1<f64>) -> Result<f64, String>
     Ok (observations
         .into_iter()
         .map(|x| {
-            let error = x - mean;
-            error.powi(2)
+            (x - mean).powi(2)
         })
         .sum()
     )

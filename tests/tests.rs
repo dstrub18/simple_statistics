@@ -1,12 +1,13 @@
+
 #[cfg(test)]
 mod tests
 {
+    
     use math::round::*;
-    use crate::counting;
-    use crate::simple_linear_regression::*;
-    use crate::utilities;
+    use simple_statistics::counting;
+    use simple_statistics::simple_linear_regression;
+    use simple_statistics::utilities;
     use assert_approx_eq;
-
     static NUM_DECIMAL_DIGITS: i8 = 3;
 
     #[test]
@@ -144,8 +145,8 @@ mod tests
     {
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let slope = get_best_fitting_slope(&x, &observations).unwrap();
-        let intercept = get_best_fitting_intercept(&x, &observations).unwrap();
+        let slope = simple_linear_regression::get_best_fitting_slope(&x, &observations).unwrap();
+        let intercept = simple_linear_regression::get_best_fitting_intercept(&x, &observations).unwrap();
         let predictions = utilities::get_predictions(&x, slope, intercept).unwrap();
         let result = half_away_from_zero(utilities::get_coefficient_of_determination(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
         
@@ -158,8 +159,8 @@ mod tests
     {
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let slope = get_best_fitting_slope(&x, &observations).unwrap();
-        let intercept = get_best_fitting_intercept(&x, &observations).unwrap();
+        let slope = simple_linear_regression::get_best_fitting_slope(&x, &observations).unwrap();
+        let intercept = simple_linear_regression::get_best_fitting_intercept(&x, &observations).unwrap();
         let predictions = utilities::get_predictions(&x, slope, intercept).unwrap();
         let result = half_away_from_zero(utilities::get_ssr(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
         
@@ -192,8 +193,8 @@ mod tests
     {
         let observations = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
-        let slope = get_best_fitting_slope(&x, &observations).unwrap();
-        let intercept = get_best_fitting_intercept(&x, &observations).unwrap();
+        let slope = simple_linear_regression::get_best_fitting_slope(&x, &observations).unwrap();
+        let intercept = simple_linear_regression::get_best_fitting_intercept(&x, &observations).unwrap();
         let predictions = utilities::get_predictions(&x, slope, intercept).unwrap();
         let result = half_away_from_zero (utilities::get_sse(&predictions, &observations).unwrap(), NUM_DECIMAL_DIGITS);
 
@@ -233,7 +234,7 @@ mod tests
     {
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
         let y = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let result = half_away_from_zero(get_best_fitting_intercept(&x, &y).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(simple_linear_regression::get_best_fitting_intercept(&x, &y).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = -0.820;
         assert_eq!(result, expected_result);
     }
@@ -243,7 +244,7 @@ mod tests
     {
         let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
         let y = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
-        let result = half_away_from_zero(get_best_fitting_slope(&x, &y).unwrap(), NUM_DECIMAL_DIGITS);
+        let result = half_away_from_zero(simple_linear_regression::get_best_fitting_slope(&x, &y).unwrap(), NUM_DECIMAL_DIGITS);
         let expected_result = 0.146;
         assert_eq!(result, expected_result);
     }
