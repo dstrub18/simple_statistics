@@ -19,6 +19,33 @@ pub fn get_variable_info(x: &ndarray::Array1<f64>) -> VariableInfo
 }
 
 #[allow(unused)]
+#[derive(Debug)]
+pub struct VariableTargetInfo
+{
+    independent_variable_info: VariableInfo,
+    dependent_variable_info: VariableInfo,
+
+    correlation_coefficient: f64,
+    covariance: f64,
+
+}
+
+#[allow(unused)]
+pub fn get_variable_target_info(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> VariableTargetInfo
+{
+        VariableTargetInfo
+        {
+            independent_variable_info: get_variable_info(x),
+            dependent_variable_info: get_variable_info(y),
+
+            correlation_coefficient: get_correlation_coefficient(x, y).unwrap(),
+            covariance: get_sample_covariance(x, y).unwrap(),
+
+        }
+}
+
+
+#[allow(unused)]
 pub fn get_correlation_coefficient(independent_variable: &ndarray::Array1<f64>, dependent_variable: &ndarray::Array1<f64>,)
 -> Result<f64, String> 
 {

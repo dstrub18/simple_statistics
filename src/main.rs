@@ -7,6 +7,10 @@ fn main()
     let some_data = file_reading::read_csv_to_array("src/datasets/data_banknote_authentication.csv", input_file_has_headers).unwrap();
 
     let some_column = some_data.index_axis(Axis(1), 1).to_owned();
+    let some_other_column = some_data.index_axis(Axis(1), 2).to_owned();
+
+    let info = utilities::get_variable_target_info(&some_column, &some_other_column);
+    println!("{:#?}", info);
 
     let column_info = utilities::get_variable_info(&some_column);
     println!("{:#?}", column_info);
