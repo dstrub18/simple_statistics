@@ -78,8 +78,6 @@ pub fn get_population_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f
     Ok(numerator / x.len() as f64)
 }
 
-
-/// Checks 2 vectors for equal length. Panics if vectors are of unequal length.
 #[allow(unused)]
 pub fn check_vectors_for_equal_length(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>)
 {
