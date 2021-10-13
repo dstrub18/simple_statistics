@@ -1,6 +1,43 @@
 use super::utilities::*;
 
 #[allow(unused)]
+#[derive(Debug)]
+pub struct VariableTargetInfo
+{
+    independent_variable_info: VariableInfo,
+    dependent_variable_info: VariableInfo,
+
+    correlation_coefficient: f64,
+    covariance: f64,
+    slope: f64,
+    intercept: f64,
+    predictions: ndarray::Array1<f64>,
+    sst: f64,
+    sse: f64,
+    ssr: f64,
+
+}
+
+#[allow(unused)]
+pub fn get_variable_target_info(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> VariableTargetInfo
+{
+        VariableTargetInfo
+        {
+            independent_variable_info: get_variable_info(x),
+            dependent_variable_info: get_variable_info(y),
+
+            correlation_coefficient: get_correlation_coefficient(x, y).unwrap(),
+            covariance: get_population_covariance(x, y).unwrap(),
+            slope: get_best_fitting_slope(x, y).unwrap(),
+            intercept: get_best_fitting_intercept(x, y).unwrap(),
+            predictions: get_predictions(x, get_best_fitting_slope(x, y).unwrap(), get_best_fitting_intercept(x, y).unwrap()).unwrap(),
+
+            sst: get_sst(y).unwrap(),
+            sse: get_sse(&get_predictions(x, get_best_fitting_slope(x, y).unwrap(), get_best_fitting_intercept(x, y).unwrap()).unwrap(), y).unwrap(),
+            ssr: get_ssr(&get_predictions(x, get_best_fitting_slope(x, y).unwrap(), get_best_fitting_intercept(x, y).unwrap()).unwrap(), y).unwrap()
+        }
+}
+#[allow(unused)]
 pub fn get_best_fitting_intercept(
     independent_variable: &ndarray::Array1<f64>,
     dependent_variable: &ndarray::Array1<f64>,
