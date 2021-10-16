@@ -128,7 +128,7 @@ pub fn get_sst(observations: &ndarray::Array1<f64>) -> Result<f64, String>
     let mean = get_mean(observations)?;
     Ok (observations
         .into_iter()
-        .map(|x| {
+        .map(|&x| {
             (x - mean).powi(2)
         })
         .sum()
@@ -159,7 +159,7 @@ pub fn get_predictions(input_vector: &ndarray::Array1<f64>, slope: f64, intercep
     let input_vector = check_vector_for_nans(input_vector)?;
     Ok(input_vector
         .into_iter()
-        .map(|x| slope * x + intercept)
+        .map(|&x| slope * x + intercept)
         .collect())
 }
 
@@ -181,7 +181,7 @@ pub fn get_sum_of_squares(input_vector: &ndarray::Array1<f64>) -> Result<f64, St
     let mean = get_mean(input_vector)?;
     
     Ok(input_vector.into_iter().map(
-                                    |element|
+                                    |&element|
                                     {(element - mean).powi(2)}).sum::<f64>() as f64)
 }
 
