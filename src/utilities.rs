@@ -25,6 +25,31 @@ pub fn get_correlation_coefficient(independent_variable: &ndarray::Array1<f64>, 
     Ok (get_sample_covariance(independent_variable, dependent_variable)? / (get_standard_deviation(independent_variable)? * get_standard_deviation(dependent_variable)?))
 }
 
+pub fn get_covariance_matrix(mat: &ndarray::Array2<f64>) -> Result<ndarray::Array2<f64>, String>
+{
+    let dim = mat.shape()[1] - 1;
+    let mut cov_mat = ndarray::Array2::<f64>::zeros((dim, dim));
+
+    for i in 0..dim
+    {
+        for j in 0..dim
+        {
+            if i==j
+            {
+                let vec_1 = mat.index_axis(ndarray::Axis(1), j).to_owned();
+                cov_mat[[i, j]] = get_variance(&vec_1)?;
+            }
+            else
+            {
+                let vec_1 = mat.index_axis(ndarray::Axis(1), i).to_owned();
+                let vec_2 = mat.index_axis(ndarray::Axis(1), j).to_owned();
+                cov_mat[[i, j]] = get_population_covariance(&vec_1, &vec_2)?;
+            }
+        }    
+    }
+    Ok(cov_mat)
+}
+
 #[allow(unused)]
 pub fn get_sample_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
 {

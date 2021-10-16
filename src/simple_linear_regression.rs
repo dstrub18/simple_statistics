@@ -15,7 +15,6 @@ pub struct VariableTargetInfo
     sst: f64,
     sse: f64,
     ssr: f64,
-
 }
 
 #[allow(unused)]
