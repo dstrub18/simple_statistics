@@ -18,6 +18,34 @@ pub fn get_variable_info(x: &ndarray::Array1<f64>) -> VariableInfo
     }
 }
 
+pub fn get_correlation_coefficient_matrix (mat: &ndarray::Array2<f64>) -> Result<ndarray::Array2<f64>, String>
+{
+    let dim = mat.shape()[1] - 1;
+    let mut corr_coeff_mat = ndarray::Array2::<f64>::zeros((dim, dim));
+
+    for i in 0..dim
+    {
+        for j in 0..dim
+        {
+            if i==j
+            {
+                corr_coeff_mat[[i, j]] = 1.0f64;
+            }
+            else if i > j
+            {
+                corr_coeff_mat[[i, j]] = corr_coeff_mat[[j, i]];
+            }
+            else
+            {
+                let vec_1 = mat.index_axis(ndarray::Axis(1), i).to_owned();
+                let vec_2 = mat.index_axis(ndarray::Axis(1), j).to_owned();
+                corr_coeff_mat[[i, j]] = get_correlation_coefficient(&vec_1, &vec_2)?;
+            }
+        }    
+    }
+    Ok(corr_coeff_mat)
+}
+
 #[allow(unused)]
 pub fn get_correlation_coefficient(independent_variable: &ndarray::Array1<f64>, dependent_variable: &ndarray::Array1<f64>,)
 -> Result<f64, String> 

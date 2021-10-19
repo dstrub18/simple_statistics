@@ -41,6 +41,7 @@ pub fn get_variable_target_info(independent_variable: &ndarray::Array1<f64>, dep
             predictions: predictions,
         }
 }
+
 #[allow(unused)]
 pub fn get_best_fitting_intercept(
     independent_variable: &ndarray::Array1<f64>,

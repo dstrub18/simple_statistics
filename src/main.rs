@@ -20,7 +20,9 @@ fn main()
     let x = ndarray::arr1(&[34.0, 108.0, 64.0, 88.0, 99.0, 51.0]);
     let y = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
     
-    let _info = simple_linear_regression::get_variable_target_info(&x, &y);
-    //println!("{:#?}", _info);
+    let info = simple_linear_regression::get_variable_target_info(&x, &y);
+    println!("{:#?}", info);
 
+    let corr_coeff_mat = utilities::get_correlation_coefficient_matrix(&some_data);
+    println!("{:#?}", corr_coeff_mat);
 }
