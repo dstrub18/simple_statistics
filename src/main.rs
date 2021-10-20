@@ -7,7 +7,7 @@ fn main()
     let some_data = file_reading::read_csv_to_array("src/datasets/data_banknote_authentication.csv", input_file_has_headers).unwrap();
 
     let cov_mat = utilities::get_covariance_matrix(&some_data);
-    println!("{:?}", cov_mat);
+    // println!("{:?}", cov_mat);
 
     let some_column = some_data.index_axis(Axis(1), 1).to_owned();
 
@@ -21,8 +21,17 @@ fn main()
     let y = ndarray::arr1(&[5.0, 17.0, 11.0, 8.0, 14.0, 5.0]);
     
     let info = simple_linear_regression::get_variable_target_info(&x, &y);
-    println!("{:#?}", info);
+    // println!("{:#?}", info);
 
-    let corr_coeff_mat = utilities::get_correlation_coefficient_matrix(&some_data);
+    let cov_mat = utilities::get_covariance_matrix(&some_data);
+    println!("{:#?}", cov_mat);
+
+
+
+    // Analysis on fish dataset
+    let fish_dataset = file_reading::read_csv_to_array("src/datasets/Fish.csv", input_file_has_headers).unwrap();
+
+    let corr_coeff_mat = utilities::get_correlation_coefficient_matrix(&fish_dataset);
     println!("{:#?}", corr_coeff_mat);
+
 }

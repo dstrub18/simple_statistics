@@ -25,23 +25,22 @@ pub fn get_correlation_coefficient_matrix (mat: &ndarray::Array2<f64>) -> Result
 
     for i in 0..dim
     {
-        for j in 0..dim
+        // Diagonal is always 1
+        corr_coeff_mat[[i, i]] = 1.0f64;
+
+        // Compute upper triangle
+        for j in i+1..dim
         {
-            if i==j
-            {
-                corr_coeff_mat[[i, j]] = 1.0f64;
-            }
-            else if i > j
-            {
-                corr_coeff_mat[[i, j]] = corr_coeff_mat[[j, i]];
-            }
-            else
-            {
-                let vec_1 = mat.index_axis(ndarray::Axis(1), i).to_owned();
-                let vec_2 = mat.index_axis(ndarray::Axis(1), j).to_owned();
-                corr_coeff_mat[[i, j]] = get_correlation_coefficient(&vec_1, &vec_2)?;
-            }
-        }    
+            let vec_1 = mat.index_axis(ndarray::Axis(1), i).to_owned();
+            let vec_2 = mat.index_axis(ndarray::Axis(1), j).to_owned();
+            corr_coeff_mat[[i, j]] = get_correlation_coefficient(&vec_1, &vec_2)?;
+        }
+
+        // Compute lower triangle
+        for j in 0..i
+        {
+            corr_coeff_mat[[i, j]] = corr_coeff_mat[[j, i]];
+        }
     }
     Ok(corr_coeff_mat)
 }
@@ -60,20 +59,23 @@ pub fn get_covariance_matrix(mat: &ndarray::Array2<f64>) -> Result<ndarray::Arra
 
     for i in 0..dim
     {
-        for j in 0..dim
+        // Diagonal is variance
+        let vec_1 = mat.index_axis(ndarray::Axis(1), i).to_owned();
+        cov_mat[[i, i]] = get_variance(&vec_1)?;
+
+        // Compute upper triangle
+        for j in i+1..dim
         {
-            if i==j
-            {
-                let vec_1 = mat.index_axis(ndarray::Axis(1), j).to_owned();
-                cov_mat[[i, j]] = get_variance(&vec_1)?;
-            }
-            else
-            {
                 let vec_1 = mat.index_axis(ndarray::Axis(1), i).to_owned();
                 let vec_2 = mat.index_axis(ndarray::Axis(1), j).to_owned();
                 cov_mat[[i, j]] = get_population_covariance(&vec_1, &vec_2)?;
-            }
-        }    
+        }
+        
+        // Compute lower triangle
+        for j in 0..i
+        {
+            cov_mat[[i, j]] = cov_mat[[j, i]];
+        }
     }
     Ok(cov_mat)
 }
