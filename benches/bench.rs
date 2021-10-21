@@ -51,7 +51,6 @@ mod tests
     #[bench]
     fn bench_some_squares(b: &mut test::Bencher)
     {
-        
         let data  = ndarray::Array1::ones(16);
         b.iter(|| simple_statistics::utilities::get_sum_of_squares(&data));
     }
