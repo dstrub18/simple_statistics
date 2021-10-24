@@ -1,3 +1,5 @@
+use num_traits;
+
 #[allow(unused)]
 #[derive(Debug)]
 pub struct VariableInfo
@@ -253,7 +255,8 @@ pub fn get_factorial(n: u64) -> u128
     result
 }
 
-pub fn check_vector_for_nans(input_vector: &ndarray::Array1<f64>) -> Result<&ndarray::Array1<f64>, String> 
+pub fn check_vector_for_nans<T>(input_vector: &ndarray::Array1<T>) -> Result<&ndarray::Array1<T>, String> 
+where T: num_traits::float::Float
 {
     if input_vector.iter().any(|&x| x.is_nan()) 
     {

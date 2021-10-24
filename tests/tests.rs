@@ -83,7 +83,7 @@ mod tests
     #[test]
     fn test_nan_check_for_success() 
     {
-        let vector = ndarray::arr1(&[1.0, 2.0]);
+        let vector = ndarray::arr1(&[1.0f64, 2.0f64]);
         let expected_result = Ok(&vector);
         assert_eq!(utilities::check_vector_for_nans(&vector), expected_result);
     }

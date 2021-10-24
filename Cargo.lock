@@ -445,6 +445,7 @@ dependencies = [
  "ndarray",
  "ndarray-csv",
  "ndarray-linalg",
+ "num-traits",
  "rust_decimal",
  "rust_decimal_macros",
 ]
