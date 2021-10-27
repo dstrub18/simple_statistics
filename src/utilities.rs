@@ -1,4 +1,5 @@
 use num_traits;
+use ndarray::{Array1, Array2};
 
 #[allow(unused)]
 #[derive(Debug)]
@@ -10,7 +11,7 @@ pub struct VariableInfo
 }
 
 #[allow(unused)]
-pub fn get_variable_info(x: &ndarray::Array1<f64>) -> VariableInfo
+pub fn get_variable_info(x: &Array1<f64>) -> VariableInfo
 {
     VariableInfo
     {
@@ -20,7 +21,7 @@ pub fn get_variable_info(x: &ndarray::Array1<f64>) -> VariableInfo
     }
 }
 
-pub fn get_correlation_coefficient_matrix (mat: &ndarray::Array2<f64>) -> Result<ndarray::Array2<f64>, String>
+pub fn get_correlation_coefficient_matrix (mat: &Array2<f64>) -> Result<ndarray::Array2<f64>, String>
 {
     let dim = mat.shape()[1] - 1;
     let mut corr_coeff_mat = ndarray::Array2::<f64>::zeros((dim, dim));
@@ -47,7 +48,7 @@ pub fn get_correlation_coefficient_matrix (mat: &ndarray::Array2<f64>) -> Result
     Ok(corr_coeff_mat)
 }
 
-pub fn get_correlation_coefficient_matrix_maybe_expensive (mat: &ndarray::Array2<f64>) -> Result<ndarray::Array2<f64>, String>
+pub fn get_correlation_coefficient_matrix_maybe_expensive (mat: &Array2<f64>) -> Result<ndarray::Array2<f64>, String>
 {
     let dim = mat.shape()[1] - 1;
     let mut corr_coeff_mat = ndarray::Array2::<f64>::zeros((dim, dim));
@@ -65,13 +66,13 @@ pub fn get_correlation_coefficient_matrix_maybe_expensive (mat: &ndarray::Array2
 }
 
 #[allow(unused)]
-pub fn get_correlation_coefficient(independent_variable: &ndarray::Array1<f64>, dependent_variable: &ndarray::Array1<f64>,)
+pub fn get_correlation_coefficient(independent_variable: &Array1<f64>, dependent_variable: &Array1<f64>,)
 -> Result<f64, String> 
 {
     Ok (get_sample_covariance(independent_variable, dependent_variable)? / (get_standard_deviation(independent_variable)? * get_standard_deviation(dependent_variable)?))
 }
 
-pub fn get_covariance_matrix(mat: &ndarray::Array2<f64>) -> Result<ndarray::Array2<f64>, String>
+pub fn get_covariance_matrix(mat: &Array2<f64>) -> Result<ndarray::Array2<f64>, String>
 {
     let dim = mat.shape()[1] - 1;
     let mut cov_mat = ndarray::Array2::<f64>::zeros((dim, dim));
@@ -100,7 +101,7 @@ pub fn get_covariance_matrix(mat: &ndarray::Array2<f64>) -> Result<ndarray::Arra
 }
 
 #[allow(unused)]
-pub fn get_sample_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
+pub fn get_sample_covariance(x: &Array1<f64>, y: &Array1<f64>) -> Result<f64, String>
 {
     check_vectors_for_equal_length(x, y);
 
@@ -113,7 +114,7 @@ pub fn get_sample_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>)
 }
 
 #[allow(unused)]
-pub fn get_population_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
+pub fn get_population_covariance(x: &Array1<f64>, y: &Array1<f64>) -> Result<f64, String>
 {
     check_vectors_for_equal_length(x, y);
 
@@ -126,7 +127,7 @@ pub fn get_population_covariance(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f
 }
 
 #[allow(unused)]
-pub fn check_vectors_for_equal_length(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>)
+pub fn check_vectors_for_equal_length(x: &Array1<f64>, y: &Array1<f64>)
 {
     if x.len() != y.len()
     {
@@ -135,44 +136,44 @@ pub fn check_vectors_for_equal_length(x: &ndarray::Array1<f64>, y: &ndarray::Arr
 }
 
 #[allow(unused)]
-pub fn get_coefficient_of_variation(population: &ndarray::Array1<f64>) -> Result<f64, String>
+pub fn get_coefficient_of_variation(population: &Array1<f64>) -> Result<f64, String>
 {
     Ok ((get_standard_deviation(population)? / get_mean(population)?)  * 100.0)
 }
 
 #[allow(unused)]
-pub fn get_z_score(data_point: f64, population: &ndarray::Array1<f64>) -> Result<f64, String>
+pub fn get_z_score(data_point: f64, population: &Array1<f64>) -> Result<f64, String>
 {
     Ok ((data_point - get_mean(population)?) / get_standard_deviation(population)?)
 }
 
 #[allow(unused)]
-pub fn get_standard_error(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
+pub fn get_standard_error(x: &Array1<f64>, y: &Array1<f64>) -> Result<f64, String>
 {
     Ok(get_mse(x, y)?.sqrt())
 }
 
 #[allow(unused)]
-pub fn get_mse(x: &ndarray::Array1<f64>, y: &ndarray::Array1<f64>) -> Result<f64, String>
+pub fn get_mse(x: &Array1<f64>, y: &Array1<f64>) -> Result<f64, String>
 {
     let degrees_of_freedom = 2;
     Ok(get_sse(x, y)? / ((x.len() - degrees_of_freedom) as f64))
 }
 
 #[allow(unused)]
-pub fn get_coefficient_of_determination(predictions: &ndarray::Array1<f64>,observations: &ndarray::Array1<f64>) -> Result<f64, String>
+pub fn get_coefficient_of_determination(predictions: &Array1<f64>,observations: &Array1<f64>) -> Result<f64, String>
 {
     Ok(get_ssr(predictions, observations)? / get_sst(observations)?)
 }
 
 #[allow(unused)]
-pub fn get_ssr(predictions: &ndarray::Array1<f64>, observations: &ndarray::Array1<f64>) -> Result<f64, String>
+pub fn get_ssr(predictions: &Array1<f64>, observations: &Array1<f64>) -> Result<f64, String>
 {
     Ok(get_sst(observations)? - get_sse(predictions, observations)?)
 }
 
 #[allow(unused)]
-pub fn get_sst(observations: &ndarray::Array1<f64>) -> Result<f64, String> 
+pub fn get_sst(observations: &Array1<f64>) -> Result<f64, String> 
 {
     let mean = get_mean(observations)?;
     Ok (observations
@@ -185,7 +186,7 @@ pub fn get_sst(observations: &ndarray::Array1<f64>) -> Result<f64, String>
 }
 
 #[allow(unused)]
-pub fn get_sse(predictions: &ndarray::Array1<f64>, observations: &ndarray::Array1<f64>) -> Result<f64, String >
+pub fn get_sse(predictions: &Array1<f64>, observations: &Array1<f64>) -> Result<f64, String >
 {
     check_vectors_for_equal_length(predictions, observations);
     let predictions = check_vector_for_nans(predictions)?;
@@ -203,7 +204,7 @@ pub fn get_sse(predictions: &ndarray::Array1<f64>, observations: &ndarray::Array
 }
 
 #[allow(unused)]
-pub fn get_predictions(input_vector: &ndarray::Array1<f64>, slope: f64, intercept: f64) -> Result<ndarray::Array1<f64>, String>
+pub fn get_predictions(input_vector: &Array1<f64>, slope: f64, intercept: f64) -> Result<ndarray::Array1<f64>, String>
 {
     let input_vector = check_vector_for_nans(input_vector)?;
     Ok(input_vector
@@ -213,19 +214,19 @@ pub fn get_predictions(input_vector: &ndarray::Array1<f64>, slope: f64, intercep
 }
 
 #[allow(unused)]
-pub fn get_standard_deviation(input_vector: &ndarray::Array1<f64>) -> Result<f64, String> 
+pub fn get_standard_deviation(input_vector: &Array1<f64>) -> Result<f64, String> 
 {
     Ok(get_variance(input_vector)?.sqrt())
 }
 
 #[allow(unused)]
-pub fn get_variance(input_vector: &ndarray::Array1<f64>) -> Result<f64, String>
+pub fn get_variance(input_vector: &Array1<f64>) -> Result<f64, String>
 {
     Ok (get_sum_of_squares(input_vector)? / (input_vector.len() as f64 - 1.0))
 }
 
 #[allow(unused)]
-pub fn get_sum_of_squares(input_vector: &ndarray::Array1<f64>) -> Result<f64, String>
+pub fn get_sum_of_squares(input_vector: &Array1<f64>) -> Result<f64, String>
 {
     let mean = get_mean(input_vector)?;
     
@@ -235,7 +236,7 @@ pub fn get_sum_of_squares(input_vector: &ndarray::Array1<f64>) -> Result<f64, St
 }
 
 #[allow(unused)]
-pub fn get_mean(input_vector: &ndarray::Array1<f64>) -> Result<f64, String> 
+pub fn get_mean(input_vector: &Array1<f64>) -> Result<f64, String> 
 {
     let input_vector = check_vector_for_nans(input_vector)?;
     match input_vector.len() {
@@ -255,7 +256,7 @@ pub fn get_factorial(n: u64) -> u128
     result
 }
 
-pub fn check_vector_for_nans<T>(input_vector: &ndarray::Array1<T>) -> Result<&ndarray::Array1<T>, String> 
+pub fn check_vector_for_nans<T>(input_vector: &Array1<T>) -> Result<&Array1<T>, String> 
 where T: num_traits::float::Float
 {
     if input_vector.iter().any(|&x| x.is_nan()) 
