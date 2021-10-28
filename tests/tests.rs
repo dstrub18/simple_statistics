@@ -7,8 +7,23 @@ mod tests
     use simple_statistics::counting;
     use simple_statistics::simple_linear_regression;
     use simple_statistics::utilities;
+    use simple_statistics::hypothesis_testing;
     use assert_approx_eq;
     static NUM_DECIMAL_DIGITS: i8 = 3;
+
+
+    #[test]
+    fn test_f_statistic()
+    {
+        let num_decimal_digits = 4;
+        let sample_1 = arr1(&[1.0, 2.0, 4.0, 5.0, 8.0]);
+        let sample_2 = arr1(&[5.0, 20.0, 40.0, 80.0, 100.0]);
+
+        let result = half_away_from_zero(hypothesis_testing::get_f_statistic(&sample_1, &sample_2).unwrap(), num_decimal_digits);
+        let expected_result = 0.0047;
+
+        assert_eq!(result, expected_result);
+    }
 
     #[test]
     fn test_covariance()
@@ -20,7 +35,6 @@ mod tests
         let expected_result = 106.933;
 
         assert_eq!(result, expected_result);
-
     }
 
     #[test]
@@ -32,7 +46,6 @@ mod tests
         let expected_result = half_away_from_zero(utilities::get_variance(&vector_1).unwrap(), NUM_DECIMAL_DIGITS);
 
         assert_eq!(result, expected_result);
-
     }
 
     #[test]
