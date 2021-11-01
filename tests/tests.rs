@@ -1,4 +1,3 @@
-
 #[cfg(test)]
 mod tests
 {
@@ -7,7 +6,7 @@ mod tests
     use simple_statistics::counting;
     use simple_statistics::simple_linear_regression;
     use simple_statistics::utilities;
-    use simple_statistics::hypothesis_testing;
+    use simple_statistics::hypothesis_testing;  
     use assert_approx_eq;
     static NUM_DECIMAL_DIGITS: i8 = 3;
 

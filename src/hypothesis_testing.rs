@@ -1,3 +1,10 @@
+/* 
+Thoughts:
+    - trait "config" for different test modes
+    - functions for different tests
+*/
+
+
 use super::utilities::{get_variance};
 use ndarray::{Array1};
 
