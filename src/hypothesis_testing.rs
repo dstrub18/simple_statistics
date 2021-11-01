@@ -2,8 +2,36 @@
 Thoughts:
     - trait "config" for different test modes
     - functions for different tests
+
+    For: one-tailed upper, 2-tailed, population mean (un-)known, 
 */
 
+#[allow(unused)]
+enum ZtestKind
+{
+    OneTailed,
+    TwoTailed
+}
+
+#[allow(unused)]
+struct ZTest
+{
+    kind: ZtestKind,
+    alpha_level: f64
+}
+
+impl ZTest
+{
+    #[allow(unused)]
+    fn new(kind: ZtestKind) -> ZTest
+    {
+        match kind
+        {
+            ZtestKind::OneTailed => ZTest {kind: ZtestKind::OneTailed, alpha_level: 0.05f64},
+            ZtestKind::TwoTailed => ZTest {kind: ZtestKind::TwoTailed, alpha_level: 0.10f64}
+        }
+    }
+}
 
 use super::utilities::{get_variance};
 use ndarray::{Array1};
