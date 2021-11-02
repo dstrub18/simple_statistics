@@ -1,3 +1,6 @@
+use super::utilities::{get_mean, get_variance};
+use ndarray::{Array1};
+
 #[allow(unused)]
 enum NullHypothesisKind
 {
@@ -13,8 +16,15 @@ struct ZTest
     alpha_level: f64
 }
 
-use super::utilities::{get_variance};
-use ndarray::{Array1};
+#[allow(unused)]
+impl ZTest
+{
+    fn perform_test(&self, hypothesized_mean: f64, population_std: f64, sample: &ndarray::Array1<f64>) -> f64
+    {
+        (get_mean(sample).unwrap() - hypothesized_mean) / (population_std / (sample.len() as f64).sqrt())
+    }
+}
+
 
 #[allow(unused)]
 pub fn get_f_statistic(sample_1: &Array1<f64>, sample_2: &Array1<f64>) -> Result<f64, String>
