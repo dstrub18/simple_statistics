@@ -28,6 +28,13 @@ mod tests
     }
 
     #[bench]
+    fn bench_built_in_mean(b: &mut test::Bencher)
+    {
+        let data  = ndarray::Array1::<f64>::ones(16);
+        b.iter(|| data.mean().unwrap());
+    }
+
+    #[bench]
     fn bench_mean(b: &mut test::Bencher)
     {
         let data  = ndarray::Array1::ones(16);

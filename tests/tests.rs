@@ -6,10 +6,29 @@ mod tests
     use simple_statistics::counting;
     use simple_statistics::simple_linear_regression;
     use simple_statistics::utilities;
-    use simple_statistics::hypothesis_testing;  
+    use simple_statistics::hypothesis_testing::{NullHypothesisKind, ZTest, get_f_statistic};  
     use assert_approx_eq;
     static NUM_DECIMAL_DIGITS: i8 = 3;
 
+
+    #[test]
+    fn test_z_statistic()
+    {
+        let num_decimal_digits = 2;
+        let mut sample = ndarray::Array1::<f64>::zeros(112);
+        for i in 0..sample.shape()[0]
+        {
+            sample[i] = 72180.0;
+        }
+
+        let hypothesized_mean = 69873.0;
+        let population_std = 13985.0;
+        let ztest = ZTest::new(NullHypothesisKind::GreaterThanOrEqualTo, 0.05);
+        let result = half_away_from_zero(ztest.perform_test(hypothesized_mean, population_std, &sample).unwrap(), num_decimal_digits);
+        let expected_result = 1.75;
+
+        assert_eq!(result, expected_result);
+    }
 
     #[test]
     fn test_f_statistic()
@@ -18,7 +37,7 @@ mod tests
         let sample_1 = arr1(&[1.0, 2.0, 4.0, 5.0, 8.0]);
         let sample_2 = arr1(&[5.0, 20.0, 40.0, 80.0, 100.0]);
 
-        let result = half_away_from_zero(hypothesis_testing::get_f_statistic(&sample_1, &sample_2).unwrap(), num_decimal_digits);
+        let result = half_away_from_zero(get_f_statistic(&sample_1, &sample_2).unwrap(), num_decimal_digits);
         let expected_result = 0.0047;
 
         assert_eq!(result, expected_result);
