@@ -13,7 +13,7 @@ pub enum NullHypothesisKind
 pub struct ZTest
 {
     null_hypothesis: NullHypothesisKind,
-    z_table: [(f64, f64); 7]
+    z_critical: f64
 }
 
 #[allow(unused)]
@@ -33,61 +33,54 @@ impl ZTest
 #[allow(unused)]
 impl ZTest
 {
-    pub fn new(&self, null_hypothesis: NullHypothesisKind, alpha_level: f64) -> Result<Self, String>
+    pub fn new(null_hypothesis: NullHypothesisKind, alpha_level: f64) -> Result<Self, String>
     {
-        let z_table:[(f64, f64);7];
+        let z_critical;
         match &null_hypothesis
         {
-            NullHypothesisKind::GreaterThanOrEqualTo => z_table = get_table_for_upper_one_tailed(),
-            NullHypothesisKind::LessThanOrEqualTo    => z_table = get_table_for_lower_one_tailed(),
-            NullHypothesisKind::EqualTo              => z_table = get_table_for_two_tailed()
+            NullHypothesisKind::GreaterThanOrEqualTo 
+            => match alpha_level
+                {
+                    x if x == 0.10      => {z_critical = 1.282;}
+                    x if x == 0.05      => {z_critical = 1.645;}
+                    x if x == 0.025     => {z_critical = 1.960;}
+                    x if x == 0.010     => {z_critical = 2.326;}
+                    x if x == 0.005     => {z_critical = 2.576;}
+                    x if x == 0.001     => {z_critical = 3.090;}
+                    x if x == 0.0001    => {z_critical = 3.719;}
+                    _ => panic!("No suitable alpha level.")
+
+                } // End match
+            NullHypothesisKind::LessThanOrEqualTo    
+            => match alpha_level
+            {
+                x if x == 0.10      => {z_critical = -1.282;}
+                x if x == 0.05      => {z_critical = -1.645;}
+                x if x == 0.025     => {z_critical = -1.960;}
+                x if x == 0.010     => {z_critical = -2.326;}
+                x if x == 0.005     => {z_critical = -2.576;}
+                x if x == 0.001     => {z_critical = -3.090;}
+                x if x == 0.0001    => {z_critical = -3.719;}
+                _ => panic!("No suitable alpha level.")
+
+            } // End match
+            NullHypothesisKind::EqualTo              
+            => match alpha_level
+            {
+                x if x == 0.20      => {z_critical = 1.282;}
+                x if x == 0.10      => {z_critical = 1.645;}
+                x if x == 0.05      => {z_critical = 1.960;}
+                x if x == 0.010     => {z_critical = 2.576;}
+                x if x == 0.001     => {z_critical = 3.291;}
+                x if x == 0.0001    => {z_critical = 3.819;}
+                _ => panic!("No suitable alpha level.")
+
+            } // End match
         }
 
-        Ok(ZTest{null_hypothesis: null_hypothesis, z_table: z_table})
+        Ok(ZTest{null_hypothesis: null_hypothesis, z_critical: z_critical})
     }
 }
-
-fn get_table_for_upper_one_tailed() -> [(f64, f64);7]
-{
-    [(0.10,     1.282), 
-     (0.05,     1.645),
-     (0.025,    1.960), 
-     (0.010,    2.326),
-     (0.005,    2.576), 
-     (0.001,    3.090),
-     (0.0001,   3.719)]
-}
-
-fn get_table_for_lower_one_tailed() -> [(f64, f64);7]
-{
-    [(0.10,     -1.282), 
-     (0.05,     -1.645),
-     (0.025,    -1.960), 
-     (0.010,    -2.326),
-     (0.005,    -2.576), 
-     (0.001,    -3.090),
-     (0.0001,   -3.719)]
-}
-
-fn get_table_for_two_tailed() -> [(f64, f64);7]
-{
-    [(0.20,     1.282), 
-     (0.10,     1.645),
-     (0.05,    1.960), 
-     (0.010,    2.576),
-     (0.001,    3.291),
-     (0.0001,   3.819),
-     (0.0,      0.0)]
-}
-
-
-
-#[allow(unused)]
-pub fn get_critical_value(hypothesis_kind: NullHypothesisKind,alpha_level: f64)
-{
-   
-}
-
 
 #[allow(unused)]
 pub fn get_f_statistic(sample_1: &Array1<f64>, sample_2: &Array1<f64>) -> Result<f64, String>
