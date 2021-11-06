@@ -1,5 +1,7 @@
 use super::utilities::{get_mean, get_variance};
 use ndarray::{Array1};
+#[allow(unused)]
+use prettytable::{Table, Attr, row, cell, Row, Cell};
 
 #[allow(unused)]
 pub enum NullHypothesisKind
@@ -13,13 +15,14 @@ pub enum NullHypothesisKind
 pub struct ZTest
 {
     null_hypothesis: NullHypothesisKind,
+    alpha_level: f64,
     z_critical: f64
 }
 
 #[allow(unused)]
 impl ZTest
 {
-    pub fn perform_test(&self, hypothesized_mean: f64, population_std: f64, sample: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn calculate_z_value(&self, hypothesized_mean: f64, population_std: f64, sample: &ndarray::Array1<f64>) -> Result<f64, String>
     {
         Ok
         (
@@ -27,6 +30,17 @@ impl ZTest
             /
             (population_std / (sample.len() as f64).sqrt())
         )
+    }
+}
+
+#[allow(unused)]
+impl ZTest
+{
+    pub fn perform_test(&self)
+    {
+        let mut result_table = Table::new();
+        result_table.add_row(row!["abcd", "efg"]);
+        result_table.printstd();
     }
 }
 
@@ -78,7 +92,15 @@ impl ZTest
             } // End match
         }
 
-        Ok(ZTest{null_hypothesis: null_hypothesis, z_critical: z_critical})
+        Ok
+        (
+            ZTest
+            {
+                null_hypothesis: null_hypothesis,
+                alpha_level: alpha_level,
+                 z_critical: z_critical
+            }
+        )
     }
 }
 

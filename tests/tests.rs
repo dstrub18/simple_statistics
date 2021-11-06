@@ -24,7 +24,7 @@ mod tests
         let hypothesized_mean = 69873.0;
         let population_std = 13985.0;
         let ztest = ZTest::new(NullHypothesisKind::GreaterThanOrEqualTo, 0.05).unwrap();
-        let result = half_away_from_zero(ztest.perform_test(hypothesized_mean, population_std, &sample).unwrap(), num_decimal_digits);
+        let result = half_away_from_zero(ztest.calculate_z_value(hypothesized_mean, population_std, &sample).unwrap(), num_decimal_digits);
         let expected_result = 1.75;
 
         assert_eq!(result, expected_result);

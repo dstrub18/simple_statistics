@@ -1,5 +1,7 @@
 use simple_statistics::{file_reading, utilities, sampling};
 use ndarray::Axis;
+use prettytable::{Table, Attr, row, cell, Row, Cell};
+
 
 fn main()
 {
