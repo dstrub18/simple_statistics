@@ -1,7 +1,6 @@
 use super::utilities::{get_mean, get_variance};
 use ndarray::{Array1};
-#[allow(unused)]
-use prettytable::{Table, Attr, row, cell, Row, Cell};
+use prettytable::{Table, Attr, row, cell, color, Row, Cell};
 
 #[allow(unused)]
 pub enum NullHypothesisKind
@@ -19,10 +18,52 @@ pub struct ZTest
     z_critical: f64
 }
 
+
 #[allow(unused)]
 impl ZTest
 {
-    pub fn calculate_z_value(&self, hypothesized_mean: f64, population_std: f64, sample: &ndarray::Array1<f64>) -> Result<f64, String>
+    pub fn perform_test(&self, hypothesized_mean: f64, population_std: f64, sample: &ndarray::Array1<f64>)
+    {
+        
+        let z_value = self.calculate_z_score(hypothesized_mean, population_std, sample).unwrap();
+        
+        let mut result: bool;
+        let mut style_attribute: Attr;
+        
+        match self.null_hypothesis
+        {
+            NullHypothesisKind::GreaterThanOrEqualTo    =>  {result = (z_value <= self.z_critical);
+                style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
+            },
+            NullHypothesisKind::LessThanOrEqualTo       =>  {result = (z_value >= self.z_critical);
+                style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
+            },
+            NullHypothesisKind::EqualTo                 =>  {result = (z_value >= -self.z_critical && z_value <= self.z_critical);
+                style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
+            },
+        }
+
+        let comment = if result ==  true {"Failed to reject null hypothesis"} else {"Reject null hypothesis"};
+        let result = format!("{}", &z_value);
+
+        let mut result_table = Table::new();
+        result_table.add_row(row!["Z-Critical", "Sample Mean",  "Hypothesized Mean", "Z-Value", "Comment"]);
+
+        result_table.add_row(Row::new
+                            (vec![
+                                  Cell::new(&self.z_critical.to_string()),
+                                  Cell::new(&get_mean(sample).unwrap().to_string()),
+                                  Cell::new(&hypothesized_mean.to_string()),
+                                  Cell::new(&result.to_string()).with_style(style_attribute),
+                                  Cell::new(comment)]));
+        result_table.printstd();
+    }
+}
+
+#[allow(unused)]
+impl ZTest
+{
+    pub fn calculate_z_score(&self, hypothesized_mean: f64, population_std: f64, sample: &ndarray::Array1<f64>) -> Result<f64, String>
     {
         Ok
         (
@@ -33,16 +74,6 @@ impl ZTest
     }
 }
 
-#[allow(unused)]
-impl ZTest
-{
-    pub fn perform_test(&self)
-    {
-        let mut result_table = Table::new();
-        result_table.add_row(row!["abcd", "efg"]);
-        result_table.printstd();
-    }
-}
 
 #[allow(unused)]
 impl ZTest
@@ -98,7 +129,7 @@ impl ZTest
             {
                 null_hypothesis: null_hypothesis,
                 alpha_level: alpha_level,
-                 z_critical: z_critical
+                z_critical: z_critical
             }
         )
     }
