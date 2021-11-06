@@ -50,12 +50,15 @@ impl ZTest
         result_table.add_row(row!["Z-Critical", "Sample Mean",  "Hypothesized Mean", "Z-Value", "Comment"]);
 
         result_table.add_row(Row::new
-                            (vec![
-                                  Cell::new(&self.z_critical.to_string()),
-                                  Cell::new(&get_mean(sample).unwrap().to_string()),
-                                  Cell::new(&hypothesized_mean.to_string()),
-                                  Cell::new(&result.to_string()).with_style(style_attribute),
-                                  Cell::new(comment)]));
+                                    (vec![
+                                        Cell::new(&self.z_critical.to_string()),
+                                        Cell::new(&get_mean(sample).unwrap().to_string()),
+                                        Cell::new(&hypothesized_mean.to_string()),
+                                        Cell::new(&result.to_string()).with_style(style_attribute),
+                                        Cell::new(comment)
+                                        ]
+                                    )
+                            );
         result_table.printstd();
     }
 }
