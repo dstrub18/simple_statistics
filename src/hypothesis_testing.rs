@@ -1,6 +1,7 @@
 use super::utilities::{get_mean, get_variance};
 use ndarray::{Array1};
 use prettytable::{Table, Attr, row, cell, color, Row, Cell};
+use std::collections::HashMap;
 
 #[allow(unused)]
 pub enum ZTestKind
@@ -18,7 +19,6 @@ pub struct ZTest
     z_critical: f64
 }
 
-
 #[allow(unused)]
 impl ZTest
 {
@@ -29,28 +29,36 @@ impl ZTest
         
         let mut result: bool;
         let mut style_attribute: Attr;
+        let mut z_type_for_print: &str;
         
         match self.z_test_kind
         {
-            ZTestKind::OneTailedUpper    =>  {result = (z_value <= self.z_critical);
-                style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
-            },
-            ZTestKind::OneTailedLower       =>  {result = (z_value >= self.z_critical);
-                style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
-            },
-            ZTestKind::TwoTailed                 =>  {result = (z_value >= -self.z_critical && z_value <= self.z_critical);
-                style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
-            },
+            ZTestKind::OneTailedUpper   =>  {
+                                                result = (z_value <= self.z_critical);
+                                                z_type_for_print = "One-Tailed-Upper";
+                                                style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
+                                            },
+            ZTestKind::OneTailedLower   =>  {
+                                                result = (z_value >= self.z_critical);
+                                                z_type_for_print = "One-Tailed-Lower";
+                                                style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
+                                            },
+            ZTestKind::TwoTailed        =>  {
+                                                result = (z_value >= -self.z_critical && z_value <= self.z_critical);
+                                                z_type_for_print = "One-Tailed-Lower";
+                                                style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
+                                            },
         }
 
         let comment = if result ==  true {"Failed to reject null hypothesis"} else {"Reject null hypothesis"};
         let result = format!("{}", &z_value);
 
         let mut result_table = Table::new();
-        result_table.add_row(row!["Z-Critical", "Sample Mean",  "Hypothesized Mean", "Z-Value", "Comment"]);
+        result_table.add_row(row!["Test type", "Z-Critical", "Sample Mean",  "Hypothesized Mean", "Z-Value", "Comment"]);
 
         result_table.add_row(Row::new
                                     (vec![
+                                        Cell::new(z_type_for_print),
                                         Cell::new(&self.z_critical.to_string()),
                                         Cell::new(&get_mean(sample).unwrap().to_string()),
                                         Cell::new(&hypothesized_mean.to_string()),
@@ -89,7 +97,7 @@ impl ZTest
             ZTestKind::OneTailedUpper 
             => match alpha_level
                 {
-                    x if x == 0.10      => {z_critical = 1.282;}
+                    x if x == 0.1       => {z_critical = 1.282;}
                     x if x == 0.05      => {z_critical = 1.645;}
                     x if x == 0.025     => {z_critical = 1.960;}
                     x if x == 0.010     => {z_critical = 2.326;}
@@ -136,6 +144,46 @@ impl ZTest
             }
         )
     }
+}
+
+#[allow(unused)]
+fn get_z_table(z_test_kind: ZTestKind) -> HashMap::<[u8; 8], f64>
+{
+    let mut table = HashMap::<[u8; 8], f64>::new();
+    match z_test_kind
+    {
+        ZTestKind::OneTailedUpper =>
+        {
+            table.insert(0.10f64.to_be_bytes(), 1.282);
+            table.insert(0.05f64.to_be_bytes(), 1.645);
+            table.insert(0.025f64.to_be_bytes(), 1.960);
+            table.insert(0.010f64.to_be_bytes(), 2.326);
+            table.insert(0.005f64.to_be_bytes(), 2.576);
+            table.insert(0.001f64.to_be_bytes(), 3.090);
+            table.insert(0.0001f64.to_be_bytes(), 3.719);
+        },
+        ZTestKind::OneTailedLower =>
+        {
+            table.insert(0.10f64.to_be_bytes(), -1.282);
+            table.insert(0.05f64.to_be_bytes(), -1.645);
+            table.insert(0.025f64.to_be_bytes(), -1.960);
+            table.insert(0.010f64.to_be_bytes(), -2.326);
+            table.insert(0.005f64.to_be_bytes(), -2.576);
+            table.insert(0.001f64.to_be_bytes(), -3.090);
+            table.insert(0.0001f64.to_be_bytes(), -3.719);
+        },
+        ZTestKind::TwoTailed =>
+        {
+            table.insert(0.20f64.to_be_bytes(),  1.282);
+            table.insert(0.20f64.to_be_bytes(),  1.282);
+            table.insert(0.10f64.to_be_bytes(),  1.645);
+            table.insert(0.05f64.to_be_bytes(),  1.960);
+            table.insert(0.010f64.to_be_bytes(), 2.576);
+            table.insert(0.001f64.to_be_bytes(), 3.291);
+            table.insert(0.0001f64.to_be_bytes(),3.819);
+        }
+    }
+    table
 }
 
 #[allow(unused)]

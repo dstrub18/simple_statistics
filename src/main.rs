@@ -1,7 +1,6 @@
 use simple_statistics::{file_reading, utilities, sampling, hypothesis_testing};
 use ndarray::Axis;
 
-
 fn main()
 {
     let input_file_has_headers = false;
@@ -17,7 +16,6 @@ fn main()
 
     let cov_mat = utilities::get_covariance_matrix(&some_data);
     println!("{:#?}", cov_mat);
-
 
 
     // Analysis on fish dataset
@@ -53,5 +51,4 @@ fn main()
 
     ztest.perform_test(hypothesized_mean, population_std, &sample);
 
-    
 }
