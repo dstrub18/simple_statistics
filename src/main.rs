@@ -35,7 +35,7 @@ fn main()
     let hypothesized_mean = 69873.0;
     let population_std = 13985.0;
     let alpha_level = 0.05;
-    let ztest = hypothesis_testing::ZTest::new(hypothesis_testing::NullHypothesisKind::EqualTo, alpha_level).unwrap();
+    let ztest = hypothesis_testing::ZTest::new(hypothesis_testing::ZTestKind::TwoTailed, alpha_level).unwrap();
 
     ztest.perform_test(hypothesized_mean, population_std, &sample);
 
@@ -49,7 +49,7 @@ fn main()
     let population_std = 1.5;
     let alpha_level = 0.01;
 
-    let ztest = hypothesis_testing::ZTest::new(hypothesis_testing::NullHypothesisKind::GreaterThanOrEqualTo, alpha_level).unwrap();
+    let ztest = hypothesis_testing::ZTest::new(hypothesis_testing::ZTestKind::OneTailedUpper, alpha_level).unwrap();
 
     ztest.perform_test(hypothesized_mean, population_std, &sample);
 

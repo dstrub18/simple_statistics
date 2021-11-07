@@ -3,17 +3,17 @@ use ndarray::{Array1};
 use prettytable::{Table, Attr, row, cell, color, Row, Cell};
 
 #[allow(unused)]
-pub enum NullHypothesisKind
+pub enum ZTestKind
 {
-    GreaterThanOrEqualTo,
-    LessThanOrEqualTo,
-    EqualTo,
+    OneTailedUpper,
+    OneTailedLower,
+    TwoTailed,
 }
 
 #[allow(unused)]
 pub struct ZTest
 {
-    null_hypothesis: NullHypothesisKind,
+    z_test_kind: ZTestKind,
     alpha_level: f64,
     z_critical: f64
 }
@@ -30,15 +30,15 @@ impl ZTest
         let mut result: bool;
         let mut style_attribute: Attr;
         
-        match self.null_hypothesis
+        match self.z_test_kind
         {
-            NullHypothesisKind::GreaterThanOrEqualTo    =>  {result = (z_value <= self.z_critical);
+            ZTestKind::OneTailedUpper    =>  {result = (z_value <= self.z_critical);
                 style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
             },
-            NullHypothesisKind::LessThanOrEqualTo       =>  {result = (z_value >= self.z_critical);
+            ZTestKind::OneTailedLower       =>  {result = (z_value >= self.z_critical);
                 style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
             },
-            NullHypothesisKind::EqualTo                 =>  {result = (z_value >= -self.z_critical && z_value <= self.z_critical);
+            ZTestKind::TwoTailed                 =>  {result = (z_value >= -self.z_critical && z_value <= self.z_critical);
                 style_attribute = if result == true {Attr::ForegroundColor(color::GREEN)} else {Attr::ForegroundColor(color::RED)};
             },
         }
@@ -81,12 +81,12 @@ impl ZTest
 #[allow(unused)]
 impl ZTest
 {
-    pub fn new(null_hypothesis: NullHypothesisKind, alpha_level: f64) -> Result<Self, String>
+    pub fn new(z_test_kind: ZTestKind, alpha_level: f64) -> Result<Self, String>
     {
         let z_critical;
-        match &null_hypothesis
+        match &z_test_kind
         {
-            NullHypothesisKind::GreaterThanOrEqualTo 
+            ZTestKind::OneTailedUpper 
             => match alpha_level
                 {
                     x if x == 0.10      => {z_critical = 1.282;}
@@ -99,7 +99,7 @@ impl ZTest
                     _ => panic!("No suitable alpha level.")
 
                 } // End match
-            NullHypothesisKind::LessThanOrEqualTo    
+            ZTestKind::OneTailedLower    
             => match alpha_level
             {
                 x if x == 0.10      => {z_critical = -1.282;}
@@ -112,7 +112,7 @@ impl ZTest
                 _ => panic!("No suitable alpha level.")
 
             } // End match
-            NullHypothesisKind::EqualTo              
+            ZTestKind::TwoTailed              
             => match alpha_level
             {
                 x if x == 0.20      => {z_critical = 1.282;}
@@ -130,7 +130,7 @@ impl ZTest
         (
             ZTest
             {
-                null_hypothesis: null_hypothesis,
+                z_test_kind: z_test_kind,
                 alpha_level: alpha_level,
                 z_critical: z_critical
             }
