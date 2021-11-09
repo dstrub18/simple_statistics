@@ -24,7 +24,6 @@ impl ZTest
 {
     pub fn perform_test(&self, hypothesized_mean: f64, population_std: f64, sample: &ndarray::Array1<f64>)
     {
-        
         let z_value = self.calculate_z_score(hypothesized_mean, population_std, sample).unwrap();
         
         let mut result: bool;
@@ -150,6 +149,22 @@ fn get_z_table(z_test_kind: &ZTestKind) -> HashMap::<[u8; 8], f64>
         }
     }
     table
+}
+
+#[allow(unused)]
+enum TTestKind
+{
+    OneTailedUpper,
+    OneTailedLower,
+    TwoTailed
+}
+
+#[allow(unused)]
+struct Ttest
+{
+    t_test_kind: TTestKind,
+    alpha_level: f64,
+    t_critical: f64
 }
 
 
