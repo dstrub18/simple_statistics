@@ -54,11 +54,18 @@ impl ZTest
         let result = format!("{}", &z_value);
 
         let mut result_table = Table::new();
-        result_table.add_row(row!["Test type", "Z-Critical", "Sample Mean",  "Hypothesized Mean", "Z-Value", "Comment"]);
+        result_table.add_row(row!["Test type",
+                                  "Alpha Level",
+                                  "Z-Critical",
+                                  "Sample Mean",
+                                  "Hypothesized Mean",
+                                  "Z-Value",
+                                  "Comment"]);
 
         result_table.add_row(Row::new
                                     (vec![
                                         Cell::new(z_type_for_print),
+                                        Cell::new(&self.alpha_level.to_string()),
                                         Cell::new(&self.z_critical.to_string()),
                                         Cell::new(&get_mean(sample).unwrap().to_string()),
                                         Cell::new(&hypothesized_mean.to_string()),
@@ -85,54 +92,13 @@ impl ZTest
     }
 }
 
-
 #[allow(unused)]
 impl ZTest
 {
     pub fn new(z_test_kind: ZTestKind, alpha_level: f64) -> Result<Self, String>
     {
-        let z_critical;
-        match &z_test_kind
-        {
-            ZTestKind::OneTailedUpper 
-            => match alpha_level
-                {
-                    x if x == 0.1       => {z_critical = 1.282;}
-                    x if x == 0.05      => {z_critical = 1.645;}
-                    x if x == 0.025     => {z_critical = 1.960;}
-                    x if x == 0.010     => {z_critical = 2.326;}
-                    x if x == 0.005     => {z_critical = 2.576;}
-                    x if x == 0.001     => {z_critical = 3.090;}
-                    x if x == 0.0001    => {z_critical = 3.719;}
-                    _ => panic!("No suitable alpha level.")
-
-                } // End match
-            ZTestKind::OneTailedLower    
-            => match alpha_level
-            {
-                x if x == 0.10      => {z_critical = -1.282;}
-                x if x == 0.05      => {z_critical = -1.645;}
-                x if x == 0.025     => {z_critical = -1.960;}
-                x if x == 0.010     => {z_critical = -2.326;}
-                x if x == 0.005     => {z_critical = -2.576;}
-                x if x == 0.001     => {z_critical = -3.090;}
-                x if x == 0.0001    => {z_critical = -3.719;}
-                _ => panic!("No suitable alpha level.")
-
-            } // End match
-            ZTestKind::TwoTailed              
-            => match alpha_level
-            {
-                x if x == 0.20      => {z_critical = 1.282;}
-                x if x == 0.10      => {z_critical = 1.645;}
-                x if x == 0.05      => {z_critical = 1.960;}
-                x if x == 0.010     => {z_critical = 2.576;}
-                x if x == 0.001     => {z_critical = 3.291;}
-                x if x == 0.0001    => {z_critical = 3.819;}
-                _ => panic!("No suitable alpha level.")
-
-            } // End match
-        }
+        let table = get_z_table(&z_test_kind);
+        let z_critical = table.get(&alpha_level.to_be_bytes());
 
         Ok
         (
@@ -140,14 +106,14 @@ impl ZTest
             {
                 z_test_kind: z_test_kind,
                 alpha_level: alpha_level,
-                z_critical: z_critical
+                z_critical: z_critical.unwrap().to_owned()
             }
         )
     }
 }
 
 #[allow(unused)]
-fn get_z_table(z_test_kind: ZTestKind) -> HashMap::<[u8; 8], f64>
+fn get_z_table(z_test_kind: &ZTestKind) -> HashMap::<[u8; 8], f64>
 {
     let mut table = HashMap::<[u8; 8], f64>::new();
     match z_test_kind
@@ -185,6 +151,7 @@ fn get_z_table(z_test_kind: ZTestKind) -> HashMap::<[u8; 8], f64>
     }
     table
 }
+
 
 #[allow(unused)]
 pub fn get_f_statistic(sample_1: &Array1<f64>, sample_2: &Array1<f64>) -> Result<f64, String>
